@@ -80,14 +80,19 @@ class _GlyphCache {
   }
 
   ({ui.Image image, double halfW, double halfH})? get(
-          String suit, double fontSize, double opacity) =>
-      _cache[_key(suit, fontSize, opacity)];
+    String suit,
+    double fontSize,
+    double opacity,
+  ) => _cache[_key(suit, fontSize, opacity)];
 
   String _key(String suit, double fontSize, double opacity) =>
       '${suit}_${fontSize.round()}_${(opacity * 100).round()}';
 
   Future<({ui.Image image, double halfW, double halfH})> _getOrCreate(
-      String suit, double fontSize, double opacity) async {
+    String suit,
+    double fontSize,
+    double opacity,
+  ) async {
     final k = _key(suit, fontSize, opacity);
     if (_cache.containsKey(k)) return _cache[k]!;
 
@@ -98,7 +103,7 @@ class _GlyphCache {
         text: suit,
         style: TextStyle(
           fontSize: fontSize,
-          color: baseColor.withOpacity(opacity),
+          color: baseColor.withValues(alpha: opacity),
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -186,17 +191,19 @@ class _SuitParticleEngine extends ChangeNotifier {
       final op = _opacities[_rng.nextInt(_opacities.length)];
       final entry = cache.get(suit, sz, op)!;
 
-      particles.add(_SuitParticle(
-        x: _rng.nextDouble() * _w,
-        y: _rng.nextDouble() * _h,
-        vx: (_rng.nextDouble() - 0.5) * 6,
-        vy: _rng.nextDouble() * 10 + 6,
-        rotation: _rng.nextDouble() * pi * 2,
-        rotationSpeed: (_rng.nextDouble() - 0.5) * 0.4,
-        image: entry.image,
-        halfW: entry.halfW,
-        halfH: entry.halfH,
-      ));
+      particles.add(
+        _SuitParticle(
+          x: _rng.nextDouble() * _w,
+          y: _rng.nextDouble() * _h,
+          vx: (_rng.nextDouble() - 0.5) * 6,
+          vy: _rng.nextDouble() * 10 + 6,
+          rotation: _rng.nextDouble() * pi * 2,
+          rotationSpeed: (_rng.nextDouble() - 0.5) * 0.4,
+          image: entry.image,
+          halfW: entry.halfW,
+          halfH: entry.halfH,
+        ),
+      );
     }
   }
 
@@ -295,12 +302,14 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
         if (snap.connectionState != ConnectionState.done) {
           return const SizedBox.expand();
         }
-        return LayoutBuilder(builder: (context, constraints) {
-          return CustomPaint(
-            size: constraints.biggest,
-            painter: _SuitParticlePainter(_engine),
-          );
-        });
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return CustomPaint(
+              size: constraints.biggest,
+              painter: _SuitParticlePainter(_engine),
+            );
+          },
+        );
       },
     );
   }
