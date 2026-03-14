@@ -101,7 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                     fontFamily: 'LuckiestGuy',
-                    height: 0.9,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spacing),
@@ -111,7 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: AppTextStyles.body.copyWith(
                     fontSize: 18,
                     color: AppColors.textSecondary,
-                    height: 0.9,
                   ),
                 ),
               ],
