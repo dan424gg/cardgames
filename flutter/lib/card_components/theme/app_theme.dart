@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppSpacing {
   static const double spacing = 10.0;
@@ -37,31 +38,25 @@ class AppColors {
 }
 
 class AppTextStyles {
-  static const _base = TextStyle(
-    fontFamily: 'LuckiestGuy',
-    color: AppColors.textPrimary,
-  );
+  static final _base = GoogleFonts.luckiestGuy(color: AppColors.textPrimary);
 
   static final title = _base.copyWith(fontSize: 28, letterSpacing: 1.5);
   static final pageTitle = _base.copyWith(fontSize: 22, letterSpacing: 1.2);
   static final sectionHeader = _base.copyWith(fontSize: 14, letterSpacing: 1.0);
 
-  static const body = TextStyle(
-    fontFamily: 'Nunito',
+  static final body = GoogleFonts.nunito(
     fontSize: 14,
     color: AppColors.textPrimary,
     fontWeight: FontWeight.w500,
   );
 
-  static const bodySmall = TextStyle(
-    fontFamily: 'Nunito',
+  static final bodySmall = GoogleFonts.nunito(
     fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: FontWeight.w400,
   );
 
-  static const label = TextStyle(
-    fontFamily: 'Nunito',
+  static final label = GoogleFonts.nunito(
     fontSize: 13,
     color: AppColors.textPrimary,
     fontWeight: FontWeight.w600,
@@ -70,12 +65,16 @@ class AppTextStyles {
 
 class AppTheme {
   static ThemeData get theme => ThemeData(
-        scaffoldBackgroundColor: AppColors.background,
-        colorScheme: const ColorScheme.light(
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          surface: AppColors.secondary,
-        ),
-        fontFamily: 'Nunito',
-      );
+    scaffoldBackgroundColor: AppColors.background,
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+      surface: AppColors.secondary,
+    ),
+    textTheme: TextTheme(
+      bodyMedium: GoogleFonts.nunito(),
+      bodySmall: GoogleFonts.nunito(),
+      labelLarge: GoogleFonts.nunito(),
+    ),
+  );
 }

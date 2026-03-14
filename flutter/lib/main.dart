@@ -93,15 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'Welcome to Cards',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 45,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                    fontFamily: 'LuckiestGuy',
-                  ),
+                  style: AppTextStyles.title,
                 ),
                 const SizedBox(height: AppSpacing.spacing),
                 Text(
