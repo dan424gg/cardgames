@@ -23,6 +23,7 @@ class ActionCard extends StatefulWidget {
   final List<Widget>? children;
   final Widget? trailing;
   final Color? iconBackgroundColor;
+  final List<BoxShadow>? boxShadow;
 
   const ActionCard({
     super.key,
@@ -38,6 +39,7 @@ class ActionCard extends StatefulWidget {
     this.children,
     this.trailing,
     this.iconBackgroundColor,
+    this.boxShadow,
   });
 
   /// Convenience: destructive/bad variant (e.g. Sign Out)
@@ -82,6 +84,7 @@ class _ActionCardState extends State<ActionCard> {
           borderRadius: _expanded
               ? const BorderRadius.vertical(top: Radius.circular(12))
               : BorderRadius.circular(12),
+          boxShadow: widget.boxShadow,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         child: Row(

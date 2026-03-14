@@ -5,6 +5,21 @@ class AppSpacing {
   static const double padding = 20.0;
 }
 
+class AppShadows {
+  static final List<BoxShadow> layered = [
+    BoxShadow(
+      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      offset: const Offset(-1, 2),
+      blurRadius: 4,
+    ),
+    BoxShadow(
+      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      offset: const Offset(1, 2),
+      blurRadius: 4,
+    ),
+  ];
+}
+
 class AppColors {
   static const primary = Color(0xFFD7EDD7);
   static const secondary = Color(0xFFFFFFFF);

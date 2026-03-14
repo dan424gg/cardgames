@@ -156,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.primary,
       iconBackgroundColor: AppColors.secondary.withAlpha(153),
       variant: ActionCardVariant.dropdown,
+      boxShadow: AppShadows.layered,
       children: gameplayOptions
           .map((option) => _buildGameplayOption(game.title, option))
           .toList(),
@@ -171,6 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: option,
         backgroundColor: AppColors.secondary,
         variant: ActionCardVariant.dropdown,
+        boxShadow: AppShadows.layered,
         children: [
           _buildOnlineOption(gameName, 'Start Game', Icons.play_arrow),
           _buildOnlineOption(gameName, 'Join Game', Icons.login),
@@ -182,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: option,
         backgroundColor: AppColors.primary,
         variant: ActionCardVariant.action,
+        boxShadow: AppShadows.layered,
         onTap: () {
           _handleGameplayTap(gameName, option);
         },
@@ -195,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: option,
       backgroundColor: AppColors.secondary,
       variant: ActionCardVariant.action,
+      boxShadow: AppShadows.layered,
       onTap: () {
         _handleGameplayTap(gameName, 'Online - $option');
       },
