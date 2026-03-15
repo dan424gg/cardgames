@@ -162,17 +162,25 @@ class _SuitParticleEngine extends ChangeNotifier {
   final List<_SuitParticle> particles = [];
   final Random _rng = Random();
   double _w = 0, _h = 0;
+  double _boundX = 0, _boundY = 0; // fixed at init, never change
   bool _initialized = false;
 
   static const _suits = ['♠', '♥', '♦', '♣'];
   static const _sizes = [12.0, 16.0, 20.0, 26.0, 32.0];
   static const _opacities = [0.06, 0.12, 0.18, 0.24, 0.30];
 
+  // How many times larger than the screen the virtual space extends in each
+  // direction. Particles are spawned across this entire area so that expanding
+  // the window immediately reveals pre-existing particles.
+  static const double _virtualPad = 3.0;
+
   Future<void> initialize(Size size, int count) async {
     if (_initialized) return;
     _initialized = true;
     _w = size.width;
     _h = size.height;
+    _boundX = _w * _virtualPad;
+    _boundY = _h * _virtualPad;
 
     final cache = _GlyphCache();
     final specs = <({String suit, double fontSize, double opacity})>[];
@@ -185,7 +193,15 @@ class _SuitParticleEngine extends ChangeNotifier {
     }
     await cache.warmUp(specs);
 
-    for (int i = 0; i < count; i++) {
+    // Spawn across the full virtual space, not just the visible window.
+    final vw = _w * _virtualPad * 2;
+    final vh = _h * _virtualPad * 2;
+    final ox = _w * _virtualPad;
+    final oy = _h * _virtualPad;
+
+    // Scale count to fill the virtual area at the same density as the visible window.
+    final virtualCount = (count * _virtualPad * _virtualPad * 4).round();
+    for (int i = 0; i < virtualCount; i++) {
       final suit = _suits[_rng.nextInt(_suits.length)];
       final sz = _sizes[_rng.nextInt(_sizes.length)];
       final op = _opacities[_rng.nextInt(_opacities.length)];
@@ -193,8 +209,8 @@ class _SuitParticleEngine extends ChangeNotifier {
 
       particles.add(
         _SuitParticle(
-          x: _rng.nextDouble() * _w,
-          y: _rng.nextDouble() * _h,
+          x: _rng.nextDouble() * vw - ox,
+          y: _rng.nextDouble() * vh - oy,
           vx: (_rng.nextDouble() - 0.5) * 6,
           vy: _rng.nextDouble() * 10 + 6,
           rotation: _rng.nextDouble() * pi * 2,
@@ -207,6 +223,12 @@ class _SuitParticleEngine extends ChangeNotifier {
     }
   }
 
+  // Resize is now a pure viewport change — no particle positions are touched.
+  void resize(Size size) {
+    _w = size.width;
+    _h = size.height;
+  }
+
   void update(double dt) {
     final safeDt = dt.clamp(0.0, 0.05);
     for (final p in particles) {
@@ -214,12 +236,12 @@ class _SuitParticleEngine extends ChangeNotifier {
       p.y += p.vy * safeDt;
       p.rotation += p.rotationSpeed * safeDt;
 
-      if (p.y > _h + 30) {
-        p.x = _rng.nextDouble() * _w;
-        p.y = -30;
+      if (p.y > _boundY + 30) {
+        p.x = (_rng.nextDouble() * 2 - 1) * _boundX;
+        p.y = -_boundY - 30;
       }
-      if (p.x < -30) p.x = _w + 30;
-      if (p.x > _w + 30) p.x = -30;
+      if (p.x < -_boundX - 30) p.x = _boundX + 30;
+      if (p.x > _boundX + 30) p.x = -_boundX - 30;
     }
     notifyListeners();
   }
@@ -267,7 +289,8 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
   final _engine = _SuitParticleEngine();
   Duration _lastTime = Duration.zero;
   bool _firstTick = true;
-  late final Future<void> _ready;
+  Future<void>? _ready;
+  bool _engineInitialized = false;
 
   @override
   void initState() {
@@ -279,7 +302,12 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final size = MediaQuery.of(context).size;
-    _ready = _engine.initialize(size, widget.particleCount);
+    if (!_engineInitialized) {
+      _engineInitialized = true;
+      _ready = _engine.initialize(size, widget.particleCount);
+    } else {
+      _engine.resize(size);
+    }
   }
 
   void _tick(Duration elapsed) {
