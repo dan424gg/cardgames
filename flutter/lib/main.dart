@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:app/floating_suits_background.dart';
-import 'package:app/card_components/cards_components.dart';
+import 'widgets/floating_suits_background.dart';
+import 'theme/app_theme.dart';
+import 'widgets/action_card.dart';
+import 'widgets/app_title.dart';
 
 void main() {
   runApp(const MyApp());

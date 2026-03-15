@@ -16,10 +16,17 @@ import 'package:flutter/scheduler.dart';
 //
 //   SuitsBackgroundWrapper(
 //     backgroundColor: Colors.white,
-//     particleCount: 150,
+//     particleCount: 150,   // target count at the reference screen area
 //     child: Scaffold(...),
 //   )
+//
+// particleCount is the target density at _kReferenceArea (1080 × 1920).
+// Larger/smaller screens get proportionally more/fewer particles so visual
+// density stays constant regardless of window size.
 // ---------------------------------------------------------------------------
+
+/// Reference area used to normalise particle density (1080 × 1920 px).
+const double _kReferenceArea = 1080.0 * 1920.0;
 
 class SuitsBackgroundWrapper extends StatelessWidget {
   const SuitsBackgroundWrapper({
@@ -32,6 +39,8 @@ class SuitsBackgroundWrapper extends StatelessWidget {
 
   final Widget child;
   final Color backgroundColor;
+
+  /// Particle count at the 1080 × 1920 reference resolution.
   final int particleCount;
   final double blurSigma;
 
@@ -41,7 +50,7 @@ class SuitsBackgroundWrapper extends StatelessWidget {
       color: backgroundColor,
       child: Stack(
         children: [
-          FloatingSuitsBackground(particleCount: particleCount),
+          FloatingSuitsBackground(referenceParticleCount: particleCount),
           Positioned.fill(
             child: BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
@@ -66,10 +75,12 @@ const _suitBaseColors = {
 };
 
 // ---------------------------------------------------------------------------
-// Pre-rasterized glyph cache
+// Pre-rasterized glyph cache (owned by the engine, lives for its lifetime)
 // ---------------------------------------------------------------------------
 class _GlyphCache {
   final Map<String, ({ui.Image image, double halfW, double halfH})> _cache = {};
+
+  bool get isWarmedUp => _cache.isNotEmpty;
 
   Future<void> warmUp(
     List<({String suit, double fontSize, double opacity})> specs,
@@ -83,7 +94,8 @@ class _GlyphCache {
     String suit,
     double fontSize,
     double opacity,
-  ) => _cache[_key(suit, fontSize, opacity)];
+  ) =>
+      _cache[_key(suit, fontSize, opacity)];
 
   String _key(String suit, double fontSize, double opacity) =>
       '${suit}_${fontSize.round()}_${(opacity * 100).round()}';
@@ -126,6 +138,18 @@ class _GlyphCache {
     return entry;
   }
 
+  /// Pick a random cached entry matching [suit].
+  ({ui.Image image, double halfW, double halfH}) random(
+    String suit,
+    List<double> sizes,
+    List<double> opacities,
+    Random rng,
+  ) {
+    final sz = sizes[rng.nextInt(sizes.length)];
+    final op = opacities[rng.nextInt(opacities.length)];
+    return get(suit, sz, op)!;
+  }
+
   void dispose() {
     for (final e in _cache.values) {
       e.image.dispose();
@@ -159,55 +183,106 @@ class _SuitParticle {
 // Engine
 // ---------------------------------------------------------------------------
 class _SuitParticleEngine extends ChangeNotifier {
+  _SuitParticleEngine({required int referenceParticleCount})
+    : _referenceCount = referenceParticleCount;
+
   final List<_SuitParticle> particles = [];
   final Random _rng = Random();
+  final _GlyphCache _cache = _GlyphCache();
+
   double _w = 0, _h = 0;
-  bool _initialized = false;
+  final int _referenceCount;
+
+  bool get _ready => _cache.isWarmedUp;
 
   static const _suits = ['♠', '♥', '♦', '♣'];
   static const _sizes = [12.0, 16.0, 20.0, 26.0, 32.0];
   static const _opacities = [0.06, 0.12, 0.18, 0.24, 0.30];
 
-  Future<void> initialize(Size size, int count) async {
-    if (_initialized) return;
-    _initialized = true;
+  // ── First call: warm up the glyph cache then spawn all particles ──────────
+  Future<void> initialize(Size size) async {
     _w = size.width;
     _h = size.height;
 
-    final cache = _GlyphCache();
-    final specs = <({String suit, double fontSize, double opacity})>[];
-    for (final suit in _suits) {
-      for (final sz in _sizes) {
-        for (final op in _opacities) {
-          specs.add((suit: suit, fontSize: sz, opacity: op));
+    if (!_cache.isWarmedUp) {
+      final specs = <({String suit, double fontSize, double opacity})>[];
+      for (final suit in _suits) {
+        for (final sz in _sizes) {
+          for (final op in _opacities) {
+            specs.add((suit: suit, fontSize: sz, opacity: op));
+          }
         }
       }
+      await _cache.warmUp(specs);
     }
-    await cache.warmUp(specs);
 
-    for (int i = 0; i < count; i++) {
-      final suit = _suits[_rng.nextInt(_suits.length)];
-      final sz = _sizes[_rng.nextInt(_sizes.length)];
-      final op = _opacities[_rng.nextInt(_opacities.length)];
-      final entry = cache.get(suit, sz, op)!;
-
-      particles.add(
-        _SuitParticle(
-          x: _rng.nextDouble() * _w,
-          y: _rng.nextDouble() * _h,
-          vx: (_rng.nextDouble() - 0.5) * 6,
-          vy: _rng.nextDouble() * 10 + 6,
-          rotation: _rng.nextDouble() * pi * 2,
-          rotationSpeed: (_rng.nextDouble() - 0.5) * 0.4,
-          image: entry.image,
-          halfW: entry.halfW,
-          halfH: entry.halfH,
-        ),
-      );
+    final target = _targetCount(size);
+    particles.clear();
+    for (int i = 0; i < target; i++) {
+      particles.add(_makeParticle(randomY: true));
     }
   }
 
+  // ── Called whenever the widget is laid out at a new size ─────────────────
+  //
+  // • Updates the boundary so the update loop wraps correctly.
+  // • Scales particle count proportionally to screen area.
+  // • Existing particles that are still on-screen keep their state (no pop).
+  // • Off-screen particles (after shrink) are removed; new ones are added at
+  //   a random position when growing.
+  void resize(Size size) {
+    if (!_ready) return;
+    if (size.width == _w && size.height == _h) return;
+
+    final oldW = _w;
+    final oldH = _h;
+    _w = size.width;
+    _h = size.height;
+
+    // Re-map existing particle positions proportionally so they stay
+    // visually in the same relative location after resize.
+    for (final p in particles) {
+      if (oldW > 0) p.x = p.x * (_w / oldW);
+      if (oldH > 0) p.y = p.y * (_h / oldH);
+    }
+
+    final target = _targetCount(size);
+
+    if (particles.length > target) {
+      // Remove excess particles from the end (arbitrary but stable).
+      particles.removeRange(target, particles.length);
+    } else {
+      // Add new particles spread randomly across the screen.
+      while (particles.length < target) {
+        particles.add(_makeParticle(randomY: true));
+      }
+    }
+  }
+
+  int _targetCount(Size size) {
+    final area = size.width * size.height;
+    // Scale linearly with area; clamp to at least 1.
+    return max(1, (_referenceCount * area / _kReferenceArea).round());
+  }
+
+  _SuitParticle _makeParticle({required bool randomY}) {
+    final suit = _suits[_rng.nextInt(_suits.length)];
+    final entry = _cache.random(suit, _sizes, _opacities, _rng);
+    return _SuitParticle(
+      x: _rng.nextDouble() * _w,
+      y: randomY ? _rng.nextDouble() * _h : -30,
+      vx: (_rng.nextDouble() - 0.5) * 6,
+      vy: _rng.nextDouble() * 10 + 6,
+      rotation: _rng.nextDouble() * pi * 2,
+      rotationSpeed: (_rng.nextDouble() - 0.5) * 0.4,
+      image: entry.image,
+      halfW: entry.halfW,
+      halfH: entry.halfH,
+    );
+  }
+
   void update(double dt) {
+    if (!_ready) return;
     final safeDt = dt.clamp(0.0, 0.05);
     for (final p in particles) {
       p.x += p.vx * safeDt;
@@ -222,6 +297,12 @@ class _SuitParticleEngine extends ChangeNotifier {
       if (p.x > _w + 30) p.x = -30;
     }
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _cache.dispose();
+    super.dispose();
   }
 }
 
@@ -253,8 +334,13 @@ class _SuitParticlePainter extends CustomPainter {
 // Widget (internal — use SuitsBackgroundWrapper publicly)
 // ---------------------------------------------------------------------------
 class FloatingSuitsBackground extends StatefulWidget {
-  const FloatingSuitsBackground({super.key, this.particleCount = 200});
-  final int particleCount;
+  const FloatingSuitsBackground({
+    super.key,
+    this.referenceParticleCount = 200,
+  });
+
+  /// Particle count at the 1080 × 1920 reference resolution.
+  final int referenceParticleCount;
 
   @override
   State<FloatingSuitsBackground> createState() =>
@@ -264,22 +350,39 @@ class FloatingSuitsBackground extends StatefulWidget {
 class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
     with SingleTickerProviderStateMixin {
   late final Ticker _ticker;
-  final _engine = _SuitParticleEngine();
+  late final _SuitParticleEngine _engine;
   Duration _lastTime = Duration.zero;
   bool _firstTick = true;
-  late final Future<void> _ready;
+
+  // Tracks the last laid-out size so we only call resize() on actual changes.
+  Size _lastSize = Size.zero;
+
+  // Future that completes once the glyph cache is warm and particles are
+  // spawned for the first time.
+  late Future<void> _ready;
+  bool _readyCompleted = false;
 
   @override
   void initState() {
     super.initState();
+    _engine = _SuitParticleEngine(
+      referenceParticleCount: widget.referenceParticleCount,
+    );
     _ticker = createTicker(_tick)..start();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final size = MediaQuery.of(context).size;
-    _ready = _engine.initialize(size, widget.particleCount);
+    if (!_readyCompleted) {
+      // Kick off the async warm-up using the current MediaQuery size as a
+      // first approximation; LayoutBuilder will refine it once built.
+      final size = MediaQuery.of(context).size;
+      _ready = _engine.initialize(size).then((_) {
+        _readyCompleted = true;
+        _lastSize = size;
+      });
+    }
   }
 
   void _tick(Duration elapsed) {
@@ -304,8 +407,19 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
         }
         return LayoutBuilder(
           builder: (context, constraints) {
+            final size = constraints.biggest;
+
+            // Notify the engine of any size change outside the paint phase.
+            if (size != _lastSize) {
+              _lastSize = size;
+              // Schedule after layout so we don't mutate state mid-build.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _engine.resize(size);
+              });
+            }
+
             return CustomPaint(
-              size: constraints.biggest,
+              size: size,
               painter: _SuitParticlePainter(_engine),
             );
           },
@@ -317,6 +431,7 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
   @override
   void dispose() {
     _ticker.dispose();
+    _engine.dispose();
     super.dispose();
   }
 }

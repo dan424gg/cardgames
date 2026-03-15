@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
-import '../cards_components.dart';
+
+import 'action_card.dart';
+import 'app_scaffold.dart';
+import 'buttons.dart';
+import 'game_code.dart';
+import 'player_card.dart';
+import 'section.dart';
+import 'team_section.dart';
 
 // ─────────────────────────────────────────
 // MAIN SCREEN (Home)
@@ -25,7 +32,10 @@ class HomeScreen extends StatelessWidget {
             variant: ActionCardVariant.dropdown,
             children: [
               SubButton(
-                  title: 'Single Player', icon: Icons.person, onTap: () {}),
+                title: 'Single Player',
+                icon: Icons.person,
+                onTap: () {},
+              ),
               SubButton(title: 'Pass & Play', icon: Icons.people, onTap: () {}),
               SubButton(title: 'Online', onTap: () {}),
               SubButton(title: 'Start Game', onTap: () {}),
@@ -49,7 +59,10 @@ class HomeScreen extends StatelessWidget {
             variant: ActionCardVariant.dropdown,
             children: [
               SubButton(
-                  title: 'Single Player', icon: Icons.person, onTap: () {}),
+                title: 'Single Player',
+                icon: Icons.person,
+                onTap: () {},
+              ),
               SubButton(title: 'Pass & Play', icon: Icons.people, onTap: () {}),
               SubButton(title: 'Online', onTap: () {}),
             ],
@@ -225,9 +238,7 @@ class _CribbageSetupScreenState extends State<CribbageSetupScreen> {
                 child: Section(
                   icon: Icons.grid_view,
                   title: 'Game Code',
-                  children: [
-                    GameCodeDisplay(code: 'XJ82K'),
-                  ],
+                  children: [GameCodeDisplay(code: 'XJ82K')],
                 ),
               ),
               const SizedBox(width: 12),
@@ -263,10 +274,11 @@ class _CribbageSetupScreenState extends State<CribbageSetupScreen> {
             players: const [
               PlayerCard(index: 1, name: 'Player One'),
               PlayerCard(
-                  index: 2,
-                  name: 'Player Two',
-                  isBot: true,
-                  robotLabel: 'Robot 1'),
+                index: 2,
+                name: 'Player Two',
+                isBot: true,
+                robotLabel: 'Robot 1',
+              ),
             ],
             onAddBots: () {},
           ),
@@ -278,10 +290,11 @@ class _CribbageSetupScreenState extends State<CribbageSetupScreen> {
             players: const [
               PlayerCard(index: 1, name: 'Player One'),
               PlayerCard(
-                  index: 2,
-                  name: 'Player Two',
-                  isBot: true,
-                  robotLabel: 'Robot 1'),
+                index: 2,
+                name: 'Player Two',
+                isBot: true,
+                robotLabel: 'Robot 1',
+              ),
             ],
             onAddBots: () {},
           ),
