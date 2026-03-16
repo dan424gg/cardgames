@@ -123,7 +123,7 @@ class _ActionCardState extends State<ActionCard> {
             AppColors.primary.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(widget.icon, size: 18, color: AppColors.textPrimary),
+      child: Icon(widget.icon, size: 22, color: AppColors.textPrimary),
     );
   }
 

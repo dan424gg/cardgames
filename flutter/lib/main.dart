@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   horizontal: AppSpacing.padding,
                   vertical: AppSpacing.padding,
                 ),
-                child: AppTitle(text: 'CARDS'),
+                child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
               ),
               SizedBox(height: AppSpacing.spacing),
               Expanded(
@@ -95,11 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  'Welcome to Cards',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.title,
-                ),
+                AppTitle(text: 'Welcome to Cards', style: AppTextStyles.title),
                 const SizedBox(height: AppSpacing.spacing),
                 Text(
                   'Select a game to get started',
@@ -122,8 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // Header
         Padding(
-          padding: EdgeInsets.all(AppSpacing.padding),
-          child: AppTitle(text: 'CARDS'),
+          padding: EdgeInsets.only(
+            left: AppSpacing.padding,
+            top: AppSpacing.padding + 20,
+            right: AppSpacing.padding,
+          ),
+          child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
         ),
         // Menu
         Expanded(
@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.primary,
       iconBackgroundColor: AppColors.secondary.withAlpha(153),
       variant: ActionCardVariant.dropdown,
-      boxShadow: AppShadows.layered,
+      boxShadow: AppShadows.boxLayered,
       children: gameplayOptions
           .map((option) => _buildGameplayOption(game.title, option))
           .toList(),
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: option,
         backgroundColor: AppColors.secondary,
         variant: ActionCardVariant.dropdown,
-        boxShadow: AppShadows.layered,
+        boxShadow: AppShadows.boxLayered,
         children: [
           _buildOnlineOption(gameName, 'Start Game', Icons.play_arrow),
           _buildOnlineOption(gameName, 'Join Game', Icons.login),
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: option,
         backgroundColor: AppColors.primary,
         variant: ActionCardVariant.action,
-        boxShadow: AppShadows.layered,
+        boxShadow: AppShadows.boxLayered,
         onTap: () {
           _handleGameplayTap(gameName, option);
         },
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
       title: option,
       backgroundColor: AppColors.secondary,
       variant: ActionCardVariant.action,
-      boxShadow: AppShadows.layered,
+      boxShadow: AppShadows.boxLayered,
       onTap: () {
         _handleGameplayTap(gameName, 'Online - $option');
       },

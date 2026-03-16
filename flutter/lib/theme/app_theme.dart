@@ -2,18 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppSpacing {
-  static const double spacing = 10.0;
+  static const double spacing = 15.0;
   static const double padding = 20.0;
 }
 
 class AppShadows {
-  static final List<BoxShadow> layered = [
+  static final List<BoxShadow> boxLayered = [
     BoxShadow(
       color: Colors.black.withAlpha((0.1 * 255).toInt()),
       offset: const Offset(-1, 2),
       blurRadius: 4,
     ),
     BoxShadow(
+      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      offset: const Offset(1, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  static final List<Shadow> textLayered = [
+    Shadow(
+      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      offset: const Offset(-1, 2),
+      blurRadius: 4,
+    ),
+    Shadow(
       color: Colors.black.withAlpha((0.1 * 255).toInt()),
       offset: const Offset(1, 2),
       blurRadius: 4,
@@ -38,9 +51,9 @@ class AppColors {
 }
 
 class AppTextStyles {
-  static final _base = GoogleFonts.luckiestGuy(color: AppColors.textPrimary);
+  static final _base = GoogleFonts.luckiestGuy(color: AppColors.textPrimary, height: 1.0);
 
-  static final title = _base.copyWith(fontSize: 28, letterSpacing: 1.5);
+  static final title = _base.copyWith(fontSize: 60, letterSpacing: 1.5);
   static final pageTitle = _base.copyWith(fontSize: 22, letterSpacing: 1.2);
   static final sectionHeader = _base.copyWith(fontSize: 14, letterSpacing: 1.0);
 
@@ -59,7 +72,7 @@ class AppTextStyles {
   static final label = GoogleFonts.nunito(
     fontSize: 13,
     color: AppColors.textPrimary,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.bold,
   );
 }
 
