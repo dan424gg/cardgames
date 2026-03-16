@@ -1,0 +1,2 @@
+- fully convert to using sf_symbols library
+- start using animations for menu items
