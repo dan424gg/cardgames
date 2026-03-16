@@ -170,6 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.secondary,
         variant: ActionCardVariant.dropdown,
         boxShadow: AppShadows.boxLayered,
+        borderRadius: 0,
         children: [
           _buildOnlineOption(gameName, 'Start Game', Icons.play_arrow),
           _buildOnlineOption(gameName, 'Join Game', Icons.login),
@@ -179,9 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return ActionCard(
         icon: option == 'Single Player' ? Icons.person : Icons.groups,
         title: option,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.secondary,
         variant: ActionCardVariant.action,
         boxShadow: AppShadows.boxLayered,
+        borderRadius: 0,
         onTap: () {
           _handleGameplayTap(gameName, option);
         },

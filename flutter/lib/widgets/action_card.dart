@@ -24,6 +24,7 @@ class ActionCard extends StatefulWidget {
   final Widget? trailing;
   final Color? iconBackgroundColor;
   final List<BoxShadow>? boxShadow;
+  final double borderRadius;
 
   const ActionCard({
     super.key,
@@ -40,6 +41,7 @@ class ActionCard extends StatefulWidget {
     this.trailing,
     this.iconBackgroundColor,
     this.boxShadow,
+    this.borderRadius = 12,
   });
 
   /// Convenience: destructive/bad variant (e.g. Sign Out)
@@ -47,14 +49,13 @@ class ActionCard extends StatefulWidget {
     required IconData icon,
     required String title,
     VoidCallback? onTap,
-  }) =>
-      ActionCard(
-        icon: icon,
-        title: title,
-        backgroundColor: AppColors.bad,
-        variant: ActionCardVariant.navigate,
-        onTap: onTap,
-      );
+  }) => ActionCard(
+    icon: icon,
+    title: title,
+    backgroundColor: AppColors.bad,
+    variant: ActionCardVariant.navigate,
+    onTap: onTap,
+  );
 
   @override
   State<ActionCard> createState() => _ActionCardState();
@@ -82,8 +83,8 @@ class _ActionCardState extends State<ActionCard> {
         decoration: BoxDecoration(
           color: widget.backgroundColor,
           borderRadius: _expanded
-              ? const BorderRadius.vertical(top: Radius.circular(12))
-              : BorderRadius.circular(12),
+              ? BorderRadius.vertical(top: Radius.circular(widget.borderRadius))
+              : BorderRadius.circular(widget.borderRadius),
           boxShadow: widget.boxShadow,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -119,7 +120,8 @@ class _ActionCardState extends State<ActionCard> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: widget.iconBackgroundColor ??
+        color:
+            widget.iconBackgroundColor ??
             AppColors.primary.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -132,15 +134,21 @@ class _ActionCardState extends State<ActionCard> {
 
     switch (widget.variant) {
       case ActionCardVariant.navigate:
-        return const Icon(Icons.chevron_right,
-            size: 18, color: AppColors.textSecondary);
+        return const Icon(
+          Icons.chevron_right,
+          size: 18,
+          color: AppColors.textSecondary,
+        );
 
       case ActionCardVariant.dropdown:
         return AnimatedRotation(
           turns: _expanded ? 0.5 : 0,
           duration: const Duration(milliseconds: 200),
-          child: const Icon(Icons.keyboard_arrow_down,
-              size: 18, color: AppColors.textSecondary),
+          child: const Icon(
+            Icons.keyboard_arrow_down,
+            size: 18,
+            color: AppColors.textSecondary,
+          ),
         );
 
       case ActionCardVariant.toggle:
@@ -155,7 +163,11 @@ class _ActionCardState extends State<ActionCard> {
         );
 
       case ActionCardVariant.action:
-        return const SizedBox.shrink();
+        return const Icon(
+          Icons.keyboard_arrow_right,
+          size: 18,
+          color: AppColors.textSecondary,
+        );
     }
   }
 
@@ -176,23 +188,13 @@ class _ActionCardState extends State<ActionCard> {
       childrenWithDividers.add(children[i]);
       if (i < children.length - 1) {
         childrenWithDividers.add(
-          const Divider(
-            height: 1,
-            color: AppColors.tertiary,
-            thickness: 1,
-          ),
+          const Divider(height: 1, color: AppColors.tertiary, thickness: 1),
         );
       }
     }
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.secondary,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 0.5),
-        ),
-      ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: childrenWithDividers,
