@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -19,15 +20,44 @@ import 'package:flutter/scheduler.dart';
 //     particleCount: 150,
 //     child: Scaffold(...),
 //   )
+//
+// Platform notes:
+//   - All platforms (Web/Chrome, macOS, iOS, Android) use the same
+//     CupertinoIcons-based rasterization path via PictureRecorder.
+//     This avoids any unicode glyph rendering inconsistencies across
+//     platforms and renderers (Skia, Impeller, CanvasKit, HTML).
+//   - Icons are pre-rasterized into ui.Image snapshots during initialization
+//     and reused every frame for maximum performance.
+//   - BackdropFilter is only inserted when blurSigma > 0 to avoid unnecessary
+//     compositing layers on Android and web.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Suit definitions — CupertinoIcons + colors
+// ---------------------------------------------------------------------------
+class _SuitDef {
+  final IconData icon;
+  final Color color;
+  const _SuitDef(this.icon, this.color);
+}
+
+const _suitDefs = [
+  _SuitDef(CupertinoIcons.suit_spade_fill,   Color(0xFF1A1A1A)),
+  _SuitDef(CupertinoIcons.suit_club_fill,    Color(0xFF1A1A1A)),
+  _SuitDef(CupertinoIcons.suit_heart_fill,   Color(0xFFCC0000)),
+  _SuitDef(CupertinoIcons.suit_diamond_fill, Color(0xFFCC0000)),
+];
+
+// ---------------------------------------------------------------------------
+// Public wrapper widget
+// ---------------------------------------------------------------------------
 class SuitsBackgroundWrapper extends StatelessWidget {
   const SuitsBackgroundWrapper({
     super.key,
     required this.child,
     this.backgroundColor = const Color(0xFFF0F7F0),
     this.particleCount = 200,
-    this.blurSigma = 2.5,
+    this.blurSigma = 1.5,
   });
 
   final Widget child;
@@ -37,17 +67,23 @@ class SuitsBackgroundWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool applyBlur = blurSigma > 0.0;
+
     return ColoredBox(
       color: backgroundColor,
       child: Stack(
         children: [
           FloatingSuitsBackground(particleCount: particleCount),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-              child: Container(color: Colors.transparent),
+          if (applyBlur)
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(
+                  sigmaX: blurSigma,
+                  sigmaY: blurSigma,
+                ),
+                child: const ColoredBox(color: Colors.transparent),
+              ),
             ),
-          ),
           child,
         ],
       ),
@@ -56,72 +92,74 @@ class SuitsBackgroundWrapper extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Suit color mapping
-// ---------------------------------------------------------------------------
-const _suitBaseColors = {
-  '♠': Color(0xFF1A1A1A),
-  '♣': Color(0xFF1A1A1A),
-  '♥': Color(0xFFCC0000),
-  '♦': Color(0xFFCC0000),
-};
-
-// ---------------------------------------------------------------------------
-// Pre-rasterized glyph cache
+// Glyph cache — rasterizes CupertinoIcons via PictureRecorder on all
+// platforms (web + native).  No unicode TextPainter involved.
 // ---------------------------------------------------------------------------
 class _GlyphCache {
   final Map<String, ({ui.Image image, double halfW, double halfH})> _cache = {};
 
+  /// Warm up the cache for every combination of suit × size × opacity.
   Future<void> warmUp(
-    List<({String suit, double fontSize, double opacity})> specs,
+    List<({_SuitDef def, double iconSize, double opacity})> specs,
   ) async {
     for (final s in specs) {
-      await _getOrCreate(s.suit, s.fontSize, s.opacity);
+      await _getOrCreate(s.def, s.iconSize, s.opacity);
     }
   }
 
   ({ui.Image image, double halfW, double halfH})? get(
-    String suit,
-    double fontSize,
+    _SuitDef def,
+    double iconSize,
     double opacity,
-  ) => _cache[_key(suit, fontSize, opacity)];
+  ) =>
+      _cache[_key(def, iconSize, opacity)];
 
-  String _key(String suit, double fontSize, double opacity) =>
-      '${suit}_${fontSize.round()}_${(opacity * 100).round()}';
+  String _key(_SuitDef def, double iconSize, double opacity) =>
+      '${def.icon.codePoint}_${iconSize.round()}_${(opacity * 100).round()}';
 
   Future<({ui.Image image, double halfW, double halfH})> _getOrCreate(
-    String suit,
-    double fontSize,
+    _SuitDef def,
+    double iconSize,
     double opacity,
   ) async {
-    final k = _key(suit, fontSize, opacity);
+    final k = _key(def, iconSize, opacity);
     if (_cache.containsKey(k)) return _cache[k]!;
 
-    final baseColor = _suitBaseColors[suit] ?? const Color(0xFF1A1A1A);
+    // Add padding so rotation doesn't clip corners.
+    final pad = iconSize * 0.25;
+    final size = iconSize + pad * 2;
 
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw via a TextPainter using the CupertinoIcons font family.
+    // This is a font-glyph lookup by codePoint — not unicode text rendering —
+    // so it is fully consistent across all Flutter platforms and renderers
+    // (Skia, Impeller, CanvasKit, HTML renderer).
     final tp = TextPainter(
       text: TextSpan(
-        text: suit,
+        text: String.fromCharCode(def.icon.codePoint),
         style: TextStyle(
-          fontSize: fontSize,
-          color: baseColor.withValues(alpha: opacity),
+          fontFamily: def.icon.fontFamily,
+          package: def.icon.fontPackage,
+          fontSize: iconSize,
+          color: def.color.withValues(alpha: opacity),
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    final pad = fontSize * 0.2;
-    final w = tp.width + pad * 2;
-    final h = tp.height + pad * 2;
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    tp.paint(canvas, Offset(pad, pad));
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(w.ceil(), h.ceil());
-    picture.dispose();
+    // Center the glyph within the padded canvas.
+    final dx = (size - tp.width) / 2;
+    final dy = (size - tp.height) / 2;
+    tp.paint(canvas, Offset(dx, dy));
     tp.dispose();
 
-    final entry = (image: image, halfW: w / 2, halfH: h / 2);
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size.ceil(), size.ceil());
+    picture.dispose();
+
+    final entry = (image: image, halfW: size / 2, halfH: size / 2);
     _cache[k] = entry;
     return entry;
   }
@@ -162,17 +200,14 @@ class _SuitParticleEngine extends ChangeNotifier {
   final List<_SuitParticle> particles = [];
   final Random _rng = Random();
   double _w = 0, _h = 0;
-  double _boundX = 0, _boundY = 0; // fixed at init, never change
+  double _boundX = 0, _boundY = 0;
   bool _initialized = false;
+  _GlyphCache? _cache;
 
-  static const _suits = ['♠', '♥', '♦', '♣'];
-  static const _sizes = [12.0, 16.0, 20.0, 26.0, 32.0];
+  static const _sizes     = [12.0, 16.0, 20.0, 26.0, 32.0];
   static const _opacities = [0.06, 0.12, 0.18, 0.24, 0.30];
-
-  // How many times larger than the screen the virtual space extends in each
-  // direction. Particles are spawned across this entire area so that expanding
-  // the window immediately reveals pre-existing particles.
-  static const double _virtualPad = 3.0;
+  static const double _virtualPad = 2.0;
+  static const int _maxVirtualParticles = 4000;
 
   Future<void> initialize(Size size, int count) async {
     if (_initialized) return;
@@ -182,30 +217,37 @@ class _SuitParticleEngine extends ChangeNotifier {
     _boundX = _w * _virtualPad;
     _boundY = _h * _virtualPad;
 
+    // Build and warm up the glyph cache.
     final cache = _GlyphCache();
-    final specs = <({String suit, double fontSize, double opacity})>[];
-    for (final suit in _suits) {
+    _cache = cache;
+
+    final specs = <({_SuitDef def, double iconSize, double opacity})>[];
+    for (final def in _suitDefs) {
       for (final sz in _sizes) {
         for (final op in _opacities) {
-          specs.add((suit: suit, fontSize: sz, opacity: op));
+          specs.add((def: def, iconSize: sz, opacity: op));
         }
       }
     }
     await cache.warmUp(specs);
 
-    // Spawn across the full virtual space, not just the visible window.
+    // Spawn particles across the virtual space.
     final vw = _w * _virtualPad * 2;
     final vh = _h * _virtualPad * 2;
     final ox = _w * _virtualPad;
     final oy = _h * _virtualPad;
 
-    // Scale count to fill the virtual area at the same density as the visible window.
-    final virtualCount = (count * _virtualPad * _virtualPad * 4).round();
+    final virtualCount = (count * _virtualPad * _virtualPad * 4)
+        .round()
+        .clamp(0, _maxVirtualParticles);
+
     for (int i = 0; i < virtualCount; i++) {
-      final suit = _suits[_rng.nextInt(_suits.length)];
-      final sz = _sizes[_rng.nextInt(_sizes.length)];
-      final op = _opacities[_rng.nextInt(_opacities.length)];
-      final entry = cache.get(suit, sz, op)!;
+      final def = _suitDefs[_rng.nextInt(_suitDefs.length)];
+      final sz  = _sizes[_rng.nextInt(_sizes.length)];
+      final op  = _opacities[_rng.nextInt(_opacities.length)];
+
+      final entry = cache.get(def, sz, op);
+      if (entry == null) continue; // shouldn't happen after warmUp
 
       particles.add(
         _SuitParticle(
@@ -223,7 +265,6 @@ class _SuitParticleEngine extends ChangeNotifier {
     }
   }
 
-  // Resize is now a pure viewport change — no particle positions are touched.
   void resize(Size size) {
     _w = size.width;
     _h = size.height;
@@ -245,14 +286,20 @@ class _SuitParticleEngine extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  @override
+  void dispose() {
+    _cache?.dispose();
+    super.dispose();
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Painter
+// Painter — single unified path for all platforms (pre-rasterized ui.Image)
 // ---------------------------------------------------------------------------
 class _SuitParticlePainter extends CustomPainter {
   final _SuitParticleEngine engine;
-  final Paint _paint = Paint()..isAntiAlias = false;
+  final Paint _imgPaint = Paint()..isAntiAlias = true;
 
   _SuitParticlePainter(this.engine) : super(repaint: engine);
 
@@ -262,7 +309,7 @@ class _SuitParticlePainter extends CustomPainter {
       canvas.save();
       canvas.translate(p.x, p.y);
       canvas.rotate(p.rotation);
-      canvas.drawImage(p.image, Offset(-p.halfW, -p.halfH), _paint);
+      canvas.drawImage(p.image, Offset(-p.halfW, -p.halfH), _imgPaint);
       canvas.restore();
     }
   }
@@ -345,6 +392,7 @@ class _FloatingSuitsBackgroundState extends State<FloatingSuitsBackground>
   @override
   void dispose() {
     _ticker.dispose();
+    _engine.dispose();
     super.dispose();
   }
 }
