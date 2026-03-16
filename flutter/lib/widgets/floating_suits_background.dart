@@ -42,9 +42,9 @@ class _SuitDef {
 }
 
 const _suitDefs = [
-  _SuitDef(CupertinoIcons.suit_spade_fill,   Color(0xFF1A1A1A)),
-  _SuitDef(CupertinoIcons.suit_club_fill,    Color(0xFF1A1A1A)),
-  _SuitDef(CupertinoIcons.suit_heart_fill,   Color(0xFFCC0000)),
+  _SuitDef(CupertinoIcons.suit_spade_fill, Color(0xFF1A1A1A)),
+  _SuitDef(CupertinoIcons.suit_club_fill, Color(0xFF1A1A1A)),
+  _SuitDef(CupertinoIcons.suit_heart_fill, Color(0xFFCC0000)),
   _SuitDef(CupertinoIcons.suit_diamond_fill, Color(0xFFCC0000)),
 ];
 
@@ -111,8 +111,7 @@ class _GlyphCache {
     _SuitDef def,
     double iconSize,
     double opacity,
-  ) =>
-      _cache[_key(def, iconSize, opacity)];
+  ) => _cache[_key(def, iconSize, opacity)];
 
   String _key(_SuitDef def, double iconSize, double opacity) =>
       '${def.icon.codePoint}_${iconSize.round()}_${(opacity * 100).round()}';
@@ -204,7 +203,7 @@ class _SuitParticleEngine extends ChangeNotifier {
   bool _initialized = false;
   _GlyphCache? _cache;
 
-  static const _sizes     = [12.0, 16.0, 20.0, 26.0, 32.0];
+  static const _sizes = [12.0, 16.0, 20.0, 26.0, 32.0];
   static const _opacities = [0.06, 0.12, 0.18, 0.24, 0.30];
   static const double _virtualPad = 2.0;
   static const int _maxVirtualParticles = 4000;
@@ -237,14 +236,15 @@ class _SuitParticleEngine extends ChangeNotifier {
     final ox = _w * _virtualPad;
     final oy = _h * _virtualPad;
 
-    final virtualCount = (count * _virtualPad * _virtualPad * 4)
-        .round()
-        .clamp(0, _maxVirtualParticles);
+    final virtualCount = (count * _virtualPad * _virtualPad * 4).round().clamp(
+      0,
+      _maxVirtualParticles,
+    );
 
     for (int i = 0; i < virtualCount; i++) {
       final def = _suitDefs[_rng.nextInt(_suitDefs.length)];
-      final sz  = _sizes[_rng.nextInt(_sizes.length)];
-      final op  = _opacities[_rng.nextInt(_opacities.length)];
+      final sz = _sizes[_rng.nextInt(_sizes.length)];
+      final op = _opacities[_rng.nextInt(_opacities.length)];
 
       final entry = cache.get(def, sz, op);
       if (entry == null) continue; // shouldn't happen after warmUp

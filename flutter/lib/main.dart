@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'widgets/floating_suits_background.dart';
 import 'theme/app_theme.dart';
 import 'widgets/action_card.dart';
+import 'card.dart';
 import 'widgets/app_title.dart';
+import 'package:flutter_sficon/flutter_sficon.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,16 +30,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<GameMenuItemModel> gameMenuItems = [
-    GameMenuItemModel(title: 'Cribbage', icon: Icons.crib),
-    GameMenuItemModel(title: 'Rummy', icon: Icons.shuffle),
-    GameMenuItemModel(title: 'Go Fish', icon: Icons.water),
+  final List<CardItemModel> gameMenuItems = [
+    CardItemModel(title: 'Cribbage', icon: Icons.crib),
+    CardItemModel(title: 'Rummy', icon: Icons.shuffle),
+    CardItemModel(title: 'Go Fish', icon: Icons.water),
   ];
 
-  final List<String> gameplayOptions = [
-    'Single Player',
-    'Pass and Play',
-    'Online',
+  final List<CardItemModel> gameplayOptions = [
+    CardItemModel(title: 'Single Player', icon: SFIcons.sf_person_fill),
+    CardItemModel(title: 'Pass and Play', icon: SFIcons.sf_person_3_fill),
+    CardItemModel(
+      title: 'Online',
+      icon: SFIcons.sf_person_line_dotted_person_fill,
+    ),
+  ];
+
+  final List<CardItemModel> onlineOptions = [
+    CardItemModel(title: 'Start Game', icon: SFIcons.sf_play_fill),
+    CardItemModel(title: 'Join Game', icon: SFIcons.sf_plus),
+  ];
+
+  final List<Map<String, bool>> _expanded = [
+    {"type": false, "online": false},
+    {"type": false, "online": false},
+    {"type": false, "online": false},
   ];
 
   @override
@@ -147,73 +163,166 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildGameCard(int gameIndex) {
     final game = gameMenuItems[gameIndex];
 
-    return ActionCard(
+    Widget gameCard = BaseCard(
       icon: game.icon,
+      trailingIcon: AnimatedRotation(
+        turns: _expanded[gameIndex]["type"]! ? 0.25 : 0,
+        duration: const Duration(milliseconds: 200),
+        child: const Icon(
+          Icons.keyboard_arrow_right,
+          size: 18,
+          color: AppColors.textSecondary,
+        ),
+      ),
       title: game.title,
       backgroundColor: AppColors.primary,
       iconBackgroundColor: AppColors.secondary.withAlpha(153),
-      variant: ActionCardVariant.dropdown,
       boxShadow: AppShadows.boxLayered,
-      children: gameplayOptions
-          .map((option) => _buildGameplayOption(game.title, option))
-          .toList(),
+    );
+
+    return Stack(
+      children: [
+        if (_expanded[gameIndex]["type"]!)
+          _buildGameTypeOptions(gameCard, gameIndex),
+        GestureDetector(
+          onTap: () => setState(
+            () => _expanded[gameIndex]["type"] = !_expanded[gameIndex]["type"]!,
+          ),
+          child: gameCard,
+        ),
+      ],
     );
   }
 
-  Widget _buildGameplayOption(String gameName, String option) {
-    final isOnline = option == 'Online';
-
-    if (isOnline) {
-      return ActionCard(
-        icon: Icons.cloud,
-        title: option,
-        backgroundColor: AppColors.secondary,
-        variant: ActionCardVariant.dropdown,
+  Widget _buildGameTypeOptions(Widget gameCard, int gameIndex) {
+    Widget gameTypeOptions = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
         boxShadow: AppShadows.boxLayered,
-        borderRadius: 0,
-        children: [
-          _buildOnlineOption(gameName, 'Start Game', Icons.play_arrow),
-          _buildOnlineOption(gameName, 'Join Game', Icons.login),
-        ],
-      );
-    } else {
-      return ActionCard(
-        icon: option == 'Single Player' ? Icons.person : Icons.groups,
-        title: option,
-        backgroundColor: AppColors.secondary,
-        variant: ActionCardVariant.action,
-        boxShadow: AppShadows.boxLayered,
-        borderRadius: 0,
-        onTap: () {
-          _handleGameplayTap(gameName, option);
-        },
-      );
-    }
-  }
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+        child: FractionallySizedBox(
+          widthFactor: 0.85,
+          child: Column(
+            children: [
+              Container(height: 2, color: Colors.white),
+              ...List.generate(gameplayOptions.length, (index) {
+                final option = gameplayOptions[index];
+                Widget onlineCard = Container(
+                  decoration: BoxDecoration(
+                    // borderRadius: BorderRadius.circular(12),
+                    boxShadow: AppShadows.boxLayered,
+                  ),
+                  child: BaseCard(
+                    title: option.title,
+                    icon: option.icon,
+                    trailingIcon: AnimatedRotation(
+                      turns: _expanded[gameIndex]["online"]! ? 0.25 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(
+                        Icons.keyboard_arrow_right,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    backgroundColor: AppColors.secondary,
+                    boxShadow: AppShadows.boxLayered,
+                    borderRadius: 0,
+                  ),
+                );
 
-  Widget _buildOnlineOption(String gameName, String option, IconData icon) {
-    return ActionCard(
-      icon: icon,
-      title: option,
-      backgroundColor: AppColors.secondary,
-      variant: ActionCardVariant.action,
-      boxShadow: AppShadows.boxLayered,
-      onTap: () {
-        _handleGameplayTap(gameName, 'Online - $option');
-      },
+                if (option.title == "Online") {
+                  return GestureDetector(
+                    onTap: () => setState(
+                      () => _expanded[gameIndex]["online"] =
+                          !_expanded[gameIndex]["online"]!,
+                    ),
+                    child: onlineCard,
+                  );
+                } else {
+                  return BaseCard(
+                    title: option.title,
+                    icon: option.icon,
+                    trailingIcon: Icons.keyboard_arrow_right,
+                    backgroundColor: AppColors.secondary,
+                    boxShadow: AppShadows.boxLayered,
+                    borderRadius: 0,
+                  );
+                }
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+    return Column(
+      children: [
+        Visibility(
+          visible: false,
+          maintainSize: true,
+          maintainState: true,
+          maintainAnimation: true,
+          child: gameCard,
+        ),
+        Stack(
+          children: [
+            if (_expanded[gameIndex]["online"]!)
+              _buildOnlineOptions(gameTypeOptions, gameIndex),
+            gameTypeOptions,
+          ],
+        ),
+      ],
     );
   }
 
-  void _handleGameplayTap(String gameName, String option) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$gameName - $option')));
+  Widget _buildOnlineOptions(Widget parent, int gameIndex) {
+    return Column(
+      children: [
+        Visibility(
+          visible: false,
+          maintainSize: true,
+          maintainState: true,
+          maintainAnimation: true,
+          child: parent,
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: AppShadows.boxLayered,
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(12),
+            ),
+            child: FractionallySizedBox(
+              widthFactor: 0.65,
+              child: Column(
+                children: [
+                  Container(height: 2, color: Colors.white),
+                  ...List.generate(onlineOptions.length, (index) {
+                    return BaseCard(
+                      title: onlineOptions[index].title,
+                      icon: onlineOptions[index].icon,
+                      trailingIcon: Icons.keyboard_arrow_right,
+                      backgroundColor: AppColors.secondary,
+                      boxShadow: AppShadows.boxLayered,
+                      borderRadius: 0,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
-class GameMenuItemModel {
+class CardItemModel {
   final String title;
   final IconData icon;
 
-  GameMenuItemModel({required this.title, required this.icon});
+  CardItemModel({required this.title, required this.icon});
 }

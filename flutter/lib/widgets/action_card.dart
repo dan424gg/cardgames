@@ -64,14 +64,26 @@ class ActionCard extends StatefulWidget {
 class _ActionCardState extends State<ActionCard> {
   bool _expanded = false;
 
+  bool get _isDropdown => widget.variant == ActionCardVariant.dropdown;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
       children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Visibility(
+              visible: false,
+              maintainSize: true,
+              maintainState: true,
+              maintainAnimation: true,
+              child: _buildMainRow(),
+            ),
+            if (_isDropdown && _expanded) _buildDropdownChildren(),
+          ],
+        ),
         _buildMainRow(),
-        if (widget.variant == ActionCardVariant.dropdown && _expanded)
-          _buildDropdownChildren(),
       ],
     );
   }
@@ -82,9 +94,7 @@ class _ActionCardState extends State<ActionCard> {
       child: Container(
         decoration: BoxDecoration(
           color: widget.backgroundColor,
-          borderRadius: _expanded
-              ? BorderRadius.vertical(top: Radius.circular(widget.borderRadius))
-              : BorderRadius.circular(widget.borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: widget.boxShadow,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -172,7 +182,7 @@ class _ActionCardState extends State<ActionCard> {
   }
 
   void _handleTap() {
-    if (widget.variant == ActionCardVariant.dropdown) {
+    if (_isDropdown) {
       setState(() => _expanded = !_expanded);
     } else if (widget.variant == ActionCardVariant.navigate ||
         widget.variant == ActionCardVariant.action) {
@@ -184,6 +194,10 @@ class _ActionCardState extends State<ActionCard> {
     final children = widget.children ?? [];
     final childrenWithDividers = <Widget>[];
 
+    childrenWithDividers.add(
+      Divider(height: 2, color: AppColors.secondary, thickness: 2),
+    );
+
     for (int i = 0; i < children.length; i++) {
       childrenWithDividers.add(children[i]);
       if (i < children.length - 1) {
@@ -193,11 +207,28 @@ class _ActionCardState extends State<ActionCard> {
       }
     }
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: childrenWithDividers,
+    return FractionallySizedBox(
+      widthFactor: 0.85,
+      child: Container(
+        // decoration: BoxDecoration(
+        //   borderRadius: BorderRadius.circular(widget.borderRadius),
+        //   boxShadow: AppShadows.boxLayered,
+        // ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            // bottom: Radius.circular(12),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: AppShadows.boxLayered,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: childrenWithDividers,
+            ),
+          ),
+        ),
       ),
     );
   }
