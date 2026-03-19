@@ -1,2 +1,3 @@
 - fully convert to using sf_symbols library
 - start using animations for menu items
+- instead of passing int for border radius, pass actual BorderRadius for more customizability

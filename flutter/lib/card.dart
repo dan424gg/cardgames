@@ -7,6 +7,7 @@ class BaseCard extends StatefulWidget {
   final Color? iconBackgroundColor;
   final String title;
   final String? subtitle;
+  final TextStyle? style;
   final Color backgroundColor;
   final List<BoxShadow>? boxShadow;
   final double borderRadius;
@@ -17,6 +18,7 @@ class BaseCard extends StatefulWidget {
     this.trailingIcon,
     required this.title,
     this.subtitle,
+    this.style,
     this.backgroundColor = AppColors.secondary,
     this.iconBackgroundColor,
     this.boxShadow,
@@ -36,7 +38,7 @@ class _BaseCardState extends State<BaseCard> {
         borderRadius: BorderRadius.circular(widget.borderRadius),
         boxShadow: widget.boxShadow,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Row(
         children: [
           if (widget.icon != null) ...[
@@ -48,7 +50,7 @@ class _BaseCardState extends State<BaseCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(widget.title, style: AppTextStyles.label),
+                Text(widget.title, style: widget.style ?? AppTextStyles.label),
                 if (widget.subtitle != null)
                   Text(widget.subtitle!, style: AppTextStyles.bodySmall),
               ],
@@ -57,7 +59,12 @@ class _BaseCardState extends State<BaseCard> {
           if (widget.trailingIcon is Widget)
             widget.trailingIcon
           else
-            Icon(widget.trailingIcon, size: 18, color: AppColors.textSecondary),
+            Icon(
+              Icons.arrow_forward_ios_sharp,
+              size: 16,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
         ],
       ),
     );
@@ -65,15 +72,15 @@ class _BaseCardState extends State<BaseCard> {
 
   Widget _buildIconBox() {
     return Container(
-      width: 32,
-      height: 32,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         color:
             widget.iconBackgroundColor ??
             AppColors.primary.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(widget.icon, size: 14, color: AppColors.textPrimary),
+      child: Icon(widget.icon, size: 16, color: AppColors.textPrimary),
     );
   }
 }

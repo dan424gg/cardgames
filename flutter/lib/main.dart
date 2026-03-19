@@ -31,9 +31,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<CardItemModel> gameMenuItems = [
-    CardItemModel(title: 'Cribbage', icon: Icons.crib),
-    CardItemModel(title: 'Rummy', icon: Icons.shuffle),
-    CardItemModel(title: 'Go Fish', icon: Icons.water),
+    CardItemModel(title: 'Cribbage', icon: SFIcons.sf_circle_grid_3x3_fill),
+    CardItemModel(title: 'Rummy', icon: SFIcons.sf_suit_spade_fill),
+    CardItemModel(title: 'Go Fish', icon: SFIcons.sf_fish_fill),
   ];
 
   final List<CardItemModel> gameplayOptions = [
@@ -64,9 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
       turns: expanded ? 0.25 : 0,
       duration: const Duration(milliseconds: 200),
       child: const Icon(
-        Icons.keyboard_arrow_right,
-        size: 18,
-        color: AppColors.textSecondary,
+        Icons.arrow_forward_ios_sharp,
+        size: 16,
+        color: Colors.black,
+        fontWeight: FontWeight.bold
       ),
     );
   }
@@ -95,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: onTap,
       child: BaseCard(
         title: item.title,
+        style: AppTextStyles.body,
         icon: item.icon,
         trailingIcon: _buildChevron(expanded),
         backgroundColor: backgroundColor,
@@ -258,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
         child: FractionallySizedBox(
-          widthFactor: 0.85,
+          widthFactor: 0.90,
           child: Column(
             children: [
               Container(height: 2, color: Colors.white),
@@ -295,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
             borderRadius:
                 const BorderRadius.vertical(bottom: Radius.circular(12)),
             child: FractionallySizedBox(
-              widthFactor: 0.65,
+              widthFactor: 0.80,
               child: Column(
                 children: [
                   Container(height: 2, color: Colors.white),

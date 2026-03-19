@@ -57,22 +57,22 @@ class AppTextStyles {
   static final pageTitle = _base.copyWith(fontSize: 22, letterSpacing: 1.2);
   static final sectionHeader = _base.copyWith(fontSize: 14, letterSpacing: 1.0);
 
-  static final body = GoogleFonts.nunito(
-    fontSize: 14,
+  static final body = GoogleFonts.inter(
+    fontSize: 16,
     color: AppColors.textPrimary,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   );
 
-  static final bodySmall = GoogleFonts.nunito(
+  static final bodySmall = GoogleFonts.inter(
     fontSize: 12,
     color: AppColors.textSecondary,
     fontWeight: FontWeight.w400,
   );
 
-  static final label = GoogleFonts.nunito(
-    fontSize: 13,
+  static final label = GoogleFonts.inter(
+    fontSize: 16,
     color: AppColors.textPrimary,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w600,
   );
 }
 
@@ -85,9 +85,9 @@ class AppTheme {
       surface: AppColors.secondary,
     ),
     textTheme: TextTheme(
-      bodyMedium: GoogleFonts.nunito(),
-      bodySmall: GoogleFonts.nunito(),
-      labelLarge: GoogleFonts.nunito(),
+      bodyMedium: GoogleFonts.inter(),
+      bodySmall: GoogleFonts.inter(),
+      labelLarge: GoogleFonts.inter(),
     ),
   );
 }
