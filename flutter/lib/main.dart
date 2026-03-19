@@ -3,10 +3,27 @@ import 'widgets/floating_suits_background.dart';
 import 'theme/app_theme.dart';
 import 'widgets/action_card.dart';
 import 'card.dart';
+import 'dart:io';
 import 'widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(800, 600), // Optional: set initial size
+      minimumSize: Size(800, 600), // Set the minimum size
+      center: true,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
   runApp(const MyApp());
 }
 
@@ -67,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Icons.arrow_forward_ios_sharp,
         size: 16,
         color: Colors.black,
-        fontWeight: FontWeight.bold
+        fontWeight: FontWeight.bold,
       ),
     );
   }
@@ -110,101 +127,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 500;
-
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
-      ),
+      body: SafeArea(child: _buildLayout()),
     );
   }
 
-  Widget _buildDesktopLayout() {
-    return Row(
-      children: [
-        // Sidebar
-        Container(
-          width: 250,
-          padding: EdgeInsets.only(
-            left: AppSpacing.padding,
-            top: AppSpacing.padding,
-            bottom: AppSpacing.padding,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
+  Widget _buildLayout() {
+    return Center(
+      child: SizedBox(
+        width: 400,
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: EdgeInsets.only(
+                left: AppSpacing.padding,
+                top: AppSpacing.padding + 20,
+                right: AppSpacing.padding,
+              ),
+              child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
+            ),
+            // Menu
+            Expanded(
+              child: ListView.separated(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.padding,
                   vertical: AppSpacing.padding,
                 ),
-                child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
+                itemCount: gameMenuItems.length,
+                separatorBuilder: (context, index) =>
+                    SizedBox(height: AppSpacing.spacing),
+                itemBuilder: (context, index) => _buildGameCard(index),
               ),
-              SizedBox(height: AppSpacing.spacing),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: gameMenuItems.length,
-                  separatorBuilder: (context, index) =>
-                      SizedBox(height: AppSpacing.spacing),
-                  itemBuilder: (context, index) => _buildGameCard(index),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Main content
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(AppSpacing.padding),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                AppTitle(text: 'Welcome to Cards', style: AppTextStyles.title),
-                const SizedBox(height: AppSpacing.spacing),
-                Text(
-                  'Select a game to get started',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.body.copyWith(
-                    fontSize: 18,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
             ),
-          ),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return Column(
-      children: [
-        // Header
-        Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.padding,
-            top: AppSpacing.padding + 20,
-            right: AppSpacing.padding,
-          ),
-          child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
-        ),
-        // Menu
-        Expanded(
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.padding,
-              vertical: AppSpacing.padding,
-            ),
-            itemCount: gameMenuItems.length,
-            separatorBuilder: (context, index) =>
-                SizedBox(height: AppSpacing.spacing),
-            itemBuilder: (context, index) => _buildGameCard(index),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -227,9 +186,8 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         if (isExpanded) _buildGameTypeOptions(gameCard, gameIndex),
         GestureDetector(
-          onTap: () => setState(
-            () => _expanded[gameIndex]["type"] = !isExpanded,
-          ),
+          onTap: () =>
+              setState(() => _expanded[gameIndex]["type"] = !isExpanded),
           child: gameCard,
         ),
       ],
@@ -246,8 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
         expanded: isOnline && isOnlineExpanded,
         onTap: isOnline
             ? () => setState(
-                  () => _expanded[gameIndex]["online"] = !isOnlineExpanded,
-                )
+                () => _expanded[gameIndex]["online"] = !isOnlineExpanded,
+              )
             : () {}, // TODO: handle Single Player / Pass and Play navigation
       );
     }).toList();
@@ -294,8 +252,9 @@ class _HomeScreenState extends State<HomeScreen> {
             boxShadow: AppShadows.boxLayered,
           ),
           child: ClipRRect(
-            borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(12)),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(12),
+            ),
             child: FractionallySizedBox(
               widthFactor: 0.80,
               child: Column(
