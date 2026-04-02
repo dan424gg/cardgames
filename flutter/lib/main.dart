@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/floating_suits_background.dart';
 import 'theme/app_theme.dart';
-import 'widgets/action_card.dart';
-import 'card.dart';
+import 'widgets/card.dart';
 import 'dart:io';
 import 'widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
