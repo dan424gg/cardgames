@@ -13,8 +13,8 @@ Future<void> main() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 600), // Optional: set initial size
-      minimumSize: Size(800, 600), // Set the minimum size
+      size: Size(800, 600),
+      minimumSize: Size(800, 600),
       center: true,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
@@ -73,13 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
     {"type": false, "online": false},
   ];
 
+  static const Duration _animDuration = Duration(milliseconds: 500);
+  static const Curve _animCurve = Curves.easeInOut;
+
   // --- Reusable helpers ---
 
   /// Animated chevron that rotates 90° when [expanded] is true.
   Widget _buildChevron(bool expanded) {
     return AnimatedRotation(
       turns: expanded ? 0.25 : 0,
-      duration: const Duration(milliseconds: 200),
+      duration: _animDuration,
+      curve: _animCurve,
       child: const Icon(
         Icons.arrow_forward_ios_sharp,
         size: 16,
@@ -183,11 +187,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     return Stack(
+      alignment: .topCenter,
       children: [
-        if (isExpanded) _buildGameTypeOptions(gameCard, gameIndex),
+        _sizeHolder(gameCard),
+        AnimatedAlign(
+          alignment: Alignment.topCenter,
+          heightFactor: isExpanded ? 1.0 : 0.0,
+          duration: _animDuration,
+          curve: _animCurve,
+          child: ClipRect(
+            child: AnimatedSlide(
+              offset: Offset(0, isExpanded ? 0 : -1),
+              duration: _animDuration,
+              curve: _animCurve,
+              child: _buildGameTypeOptions(gameCard, gameIndex),
+            ),
+          ),
+        ),
         GestureDetector(
-          onTap: () =>
-              setState(() => _expanded[gameIndex]["type"] = !isExpanded),
+          onTap: () {
+            setState(() {
+              final opening = !isExpanded;
+              _expanded[gameIndex]["type"] = opening;
+              // Collapse online sub-menu when closing the game card
+              if (!opening) _expanded[gameIndex]["online"] = false;
+            });
+          },
           child: gameCard,
         ),
       ],
