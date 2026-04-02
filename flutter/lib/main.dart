@@ -7,10 +7,11 @@ import 'dart:io';
 import 'widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(800, 600), // Optional: set initial size
