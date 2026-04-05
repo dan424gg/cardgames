@@ -51,7 +51,10 @@ class AppColors {
 }
 
 class AppTextStyles {
-  static final _base = GoogleFonts.luckiestGuy(color: AppColors.textPrimary, height: 1.0);
+  static final _base = GoogleFonts.luckiestGuy(
+    color: AppColors.textPrimary,
+    height: 1.0,
+  );
 
   static final title = _base.copyWith(fontSize: 60, letterSpacing: 1.5);
   static final pageTitle = _base.copyWith(fontSize: 22, letterSpacing: 1.2);
@@ -90,4 +93,9 @@ class AppTheme {
       labelLarge: GoogleFonts.inter(),
     ),
   );
+}
+
+class AppAnimations {
+  static const duration = Duration(milliseconds: 600);
+  static const curve = Curves.easeInOut;
 }

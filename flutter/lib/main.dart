@@ -7,6 +7,7 @@ import 'widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'widgets/animated_expandable.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,39 +74,21 @@ class _HomeScreenState extends State<HomeScreen> {
     {"type": false, "online": false},
   ];
 
-  static const Duration _animDuration = Duration(milliseconds: 500);
-  static const Curve _animCurve = Curves.easeInOut;
-
   // --- Reusable helpers ---
 
-  /// Animated chevron that rotates 90° when [expanded] is true.
   Widget _buildChevron(bool expanded) {
     return AnimatedRotation(
       turns: expanded ? 0.25 : 0,
-      duration: _animDuration,
-      curve: _animCurve,
+      duration: AppAnimations.duration,
+      curve: AppAnimations.curve,
       child: const Icon(
         Icons.arrow_forward_ios_sharp,
         size: 16,
         color: Colors.black,
-        fontWeight: FontWeight.bold,
       ),
     );
   }
 
-  /// Invisible size-preserving placeholder so the submenu
-  /// can push content down by exactly the parent card's height.
-  Widget _sizeHolder(Widget child) {
-    return Visibility(
-      visible: false,
-      maintainSize: true,
-      maintainState: true,
-      maintainAnimation: true,
-      child: child,
-    );
-  }
-
-  /// A tappable [BaseCard] row that shows an animated chevron.
   Widget _buildExpandableRow({
     required CardItemModel item,
     required bool expanded,
@@ -143,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 400,
         child: Column(
           children: [
-            // Header
             Padding(
               padding: EdgeInsets.only(
                 left: AppSpacing.padding,
@@ -152,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
             ),
-            // Menu
             Expanded(
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(
@@ -160,9 +141,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   vertical: AppSpacing.padding,
                 ),
                 itemCount: gameMenuItems.length,
-                separatorBuilder: (context, index) =>
-                    SizedBox(height: AppSpacing.spacing),
-                itemBuilder: (context, index) => _buildGameCard(index),
+                separatorBuilder: (_, index) => AnimatedContainer(
+                  duration: AppAnimations.duration,
+                  curve: AppAnimations.curve,
+                  height: _expanded[index]["type"]! ? 0 : AppSpacing.spacing,
+                ),
+                itemBuilder: (_, index) => _buildGameCard(index),
               ),
             ),
           ],
@@ -177,53 +161,34 @@ class _HomeScreenState extends State<HomeScreen> {
     final game = gameMenuItems[gameIndex];
     final isExpanded = _expanded[gameIndex]["type"]!;
 
-    final gameCard = BaseCard(
-      icon: game.icon,
-      trailingIcon: _buildChevron(isExpanded),
-      title: game.title,
-      backgroundColor: AppColors.primary,
-      iconBackgroundColor: AppColors.secondary.withAlpha(153),
-      boxShadow: AppShadows.boxLayered,
+    final gameCard = GestureDetector(
+      onTap: () => setState(() {
+        final opening = !isExpanded;
+        _expanded[gameIndex]["type"] = opening;
+        if (!opening) _expanded[gameIndex]["online"] = false;
+      }),
+      child: BaseCard(
+        icon: game.icon,
+        trailingIcon: _buildChevron(isExpanded),
+        title: game.title,
+        backgroundColor: AppColors.primary,
+        iconBackgroundColor: AppColors.secondary.withAlpha(153),
+        boxShadow: AppShadows.boxLayered,
+      ),
     );
 
-    return Stack(
-      alignment: .topCenter,
-      children: [
-        _sizeHolder(gameCard),
-        AnimatedAlign(
-          alignment: Alignment.topCenter,
-          heightFactor: isExpanded ? 1.0 : 0.0,
-          duration: _animDuration,
-          curve: _animCurve,
-          child: ClipRect(
-            child: AnimatedSlide(
-              offset: Offset(0, isExpanded ? 0 : -1),
-              duration: _animDuration,
-              curve: _animCurve,
-              child: _buildGameTypeOptions(gameCard, gameIndex),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              final opening = !isExpanded;
-              _expanded[gameIndex]["type"] = opening;
-              // Collapse online sub-menu when closing the game card
-              if (!opening) _expanded[gameIndex]["online"] = false;
-            });
-          },
-          child: gameCard,
-        ),
-      ],
+    return AnimatedExpandable(
+      header: gameCard,
+      isExpanded: isExpanded,
+      child: _buildGameTypeOptions(gameIndex),
     );
   }
 
-  Widget _buildGameTypeOptions(Widget gameCard, int gameIndex) {
+  Widget _buildGameTypeOptions(int gameIndex) {
     final isOnlineExpanded = _expanded[gameIndex]["online"]!;
 
     final rows = gameplayOptions.map((option) {
-      final isOnline = option.title == "Online";
+      final isOnline = option.title == 'Online';
       return _buildExpandableRow(
         item: option,
         expanded: isOnline && isOnlineExpanded,
@@ -254,15 +219,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    return Column(
+    return Stack(
       children: [
-        _sizeHolder(gameCard),
-        Stack(
-          children: [
-            if (isOnlineExpanded) _buildOnlineOptions(gameTypeMenu),
-            gameTypeMenu,
-          ],
-        ),
+        if (isOnlineExpanded) _buildOnlineOptions(gameTypeMenu),
+        gameTypeMenu,
       ],
     );
   }
@@ -270,7 +230,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildOnlineOptions(Widget placeholder) {
     return Column(
       children: [
-        _sizeHolder(placeholder),
+        // Reserves the height of the gameTypeMenu above the online options
+        Visibility(
+          visible: false,
+          maintainSize: true,
+          maintainState: true,
+          maintainAnimation: true,
+          child: placeholder,
+        ),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
