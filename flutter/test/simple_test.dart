@@ -176,7 +176,7 @@ void main() {
 
       await tester.tap(gameCardFinder);
       // Use pump with longer duration instead of pumpAndSettle to avoid timeout
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(AppAnimations.duration);
 
       // Verify that game options are now visible
       expect(find.text('Single Player'), findsWidgets);
@@ -191,7 +191,7 @@ void main() {
 
       if (onlineFinder.evaluate().isNotEmpty) {
         await tester.tap(onlineFinder.first);
-        await tester.pump(const Duration(milliseconds: 600));
+        await tester.pump(AppAnimations.duration);
 
         // Verify online submenu options appear
         expect(find.text('Start Game'), findsWidgets);
@@ -200,7 +200,7 @@ void main() {
 
       // Collapse the game card
       await tester.tap(gameCardFinder);
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(AppAnimations.duration);
     }
   });
 }
