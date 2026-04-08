@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:app/theme/app_theme.dart';
+import 'size_holder.dart';
 
 class AnimatedExpandable extends StatelessWidget {
   const AnimatedExpandable({
@@ -11,7 +12,6 @@ class AnimatedExpandable extends StatelessWidget {
     required this.isExpanded,
     this.duration = AppAnimations.duration,
     this.curve = AppAnimations.curve,
-    this.bottomPadding = AppSpacing.spacing,
   });
 
   final Widget header;
@@ -19,54 +19,59 @@ class AnimatedExpandable extends StatelessWidget {
   final bool isExpanded;
   final Duration duration;
   final Curve curve;
-  final double bottomPadding;
-
-  static const Duration defaultDuration = Duration(milliseconds: 500);
-  static const Curve defaultCurve = Curves.easeInOut;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: Alignment.topCenter,
       children: [
-        // Reserves the header's space so the Stack is tall enough
-        _SizeHolder(child: header),
-        ClipRRect(
-          child: AnimatedAlign(
-            alignment: Alignment.topCenter,
-            heightFactor: isExpanded ? 1.0 : 0.0,
-            duration: duration,
-            curve: curve,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _SizeHolder(child: header),
-                Padding(
-                  padding: EdgeInsets.only(bottom: bottomPadding),
-                  child: child,
-                ),
-              ],
-            ),
-          ),
-        ), // The real interactive header always sits on top
+        // invisible placeholder for size of header for spacing
+        SizeHolder(child: header),
+
+        // clip the top path so we get the in/out of view visual effect
+        ClipPath(
+          clipper: TopOnlyClipper(),
+          child:
+              // when not expanded, height of box goes to 0, producing the minimizing effect
+              AnimatedAlign(
+                alignment: Alignment.topCenter,
+                heightFactor: isExpanded ? 1.0 : 0.0,
+                duration: duration,
+                curve: curve,
+                child:
+                    // when not expanded, child slides upward out (by a factor of it's own height)
+                    AnimatedSlide(
+                      offset: Offset(0, isExpanded ? 0.0 : -1.0),
+                      duration: duration,
+                      curve: curve,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizeHolder(child: header),
+                          child,
+                        ],
+                      ),
+                    ),
+              ),
+        ),
         header,
       ],
     );
   }
 }
 
-class _SizeHolder extends StatelessWidget {
-  const _SizeHolder({required this.child});
-  final Widget child;
+class TopOnlyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.moveTo(-1000, 0);
+    path.lineTo(size.width + 1000, 0);
+    path.lineTo(size.width + 1000, size.height + 1000);
+    path.lineTo(-1000, size.height + 1000);
+    path.close();
+    return path;
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Visibility(
-      visible: false,
-      maintainSize: true,
-      maintainState: true,
-      maintainAnimation: true,
-      child: child,
-    );
-  }
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

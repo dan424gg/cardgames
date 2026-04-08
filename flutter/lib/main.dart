@@ -8,6 +8,8 @@ import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'widgets/animated_expandable.dart';
+import 'widgets/animated_chevron.dart';
+import 'widgets/size_holder.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,39 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+class GameEntry {
+  final String title;
+  final IconData icon;
+
+  const GameEntry({required this.title, required this.icon});
+}
+
+/// Tracks the two independent expand/collapse states for a single game card.
+class GameExpansionState {
+  final bool gameTypeExpanded;
+  final bool onlineExpanded;
+
+  const GameExpansionState({
+    this.gameTypeExpanded = false,
+    this.onlineExpanded = false,
+  });
+
+  GameExpansionState copyWith({bool? gameTypeExpanded, bool? onlineExpanded}) {
+    return GameExpansionState(
+      gameTypeExpanded: gameTypeExpanded ?? this.gameTypeExpanded,
+      onlineExpanded: onlineExpanded ?? this.onlineExpanded,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Home screen
+// ---------------------------------------------------------------------------
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -48,66 +83,54 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<CardItemModel> gameMenuItems = [
-    CardItemModel(title: 'Cribbage', icon: SFIcons.sf_circle_grid_3x3_fill),
-    CardItemModel(title: 'Rummy', icon: SFIcons.sf_suit_spade_fill),
-    CardItemModel(title: 'Go Fish', icon: SFIcons.sf_fish_fill),
+  static const List<GameEntry> _games = [
+    GameEntry(title: 'Cribbage', icon: SFIcons.sf_circle_grid_3x3_fill),
+    GameEntry(title: 'Rummy', icon: SFIcons.sf_suit_spade_fill),
+    GameEntry(title: 'Go Fish', icon: SFIcons.sf_fish_fill),
   ];
 
-  final List<CardItemModel> gameplayOptions = [
-    CardItemModel(title: 'Single Player', icon: SFIcons.sf_person_fill),
-    CardItemModel(title: 'Pass and Play', icon: SFIcons.sf_person_3_fill),
-    CardItemModel(
-      title: 'Online',
-      icon: SFIcons.sf_person_line_dotted_person_fill,
-    ),
-  ];
+  late List<GameExpansionState> _expansionStates;
 
-  final List<CardItemModel> onlineOptions = [
-    CardItemModel(title: 'Start Game', icon: SFIcons.sf_play_fill),
-    CardItemModel(title: 'Join Game', icon: SFIcons.sf_plus),
-  ];
-
-  final List<Map<String, bool>> _expanded = [
-    {"type": false, "online": false},
-    {"type": false, "online": false},
-    {"type": false, "online": false},
-  ];
-
-  // --- Reusable helpers ---
-
-  Widget _buildChevron(bool expanded) {
-    return AnimatedRotation(
-      turns: expanded ? 0.25 : 0,
-      duration: AppAnimations.duration,
-      curve: AppAnimations.curve,
-      child: const Icon(
-        Icons.arrow_forward_ios_sharp,
-        size: 16,
-        color: Colors.black,
-      ),
+  @override
+  void initState() {
+    super.initState();
+    _expansionStates = List.generate(
+      _games.length,
+      (_) => const GameExpansionState(),
     );
   }
 
-  Widget _buildExpandableRow({
-    required CardItemModel item,
-    required bool expanded,
-    required VoidCallback onTap,
-    Color backgroundColor = AppColors.secondary,
-    double borderRadius = 0,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: BaseCard(
-        title: item.title,
-        style: AppTextStyles.body,
-        icon: item.icon,
-        trailingIcon: _buildChevron(expanded),
-        backgroundColor: backgroundColor,
-        boxShadow: AppShadows.boxLayered,
-        borderRadius: borderRadius,
-      ),
-    );
+  // --- Mutators ---
+
+  void _toggleGameType(int index) {
+    final current = _expansionStates[index];
+    final opening = !current.gameTypeExpanded;
+    setState(() {
+      // Close all other games
+      for (int i = 0; i < _expansionStates.length; i++) {
+        if (i != index) {
+          _expansionStates[i] = _expansionStates[i].copyWith(
+            gameTypeExpanded: false,
+            onlineExpanded: false,
+          );
+        }
+      }
+      // Toggle the current game
+      _expansionStates[index] = current.copyWith(
+        gameTypeExpanded: opening,
+        // Collapse the online sub-menu whenever the parent collapses.
+        onlineExpanded: opening ? current.onlineExpanded : false,
+      );
+    });
+  }
+
+  void _toggleOnline(int index) {
+    final current = _expansionStates[index];
+    setState(() {
+      _expansionStates[index] = current.copyWith(
+        onlineExpanded: !current.onlineExpanded,
+      );
+    });
   }
 
   // --- Layout ---
@@ -140,12 +163,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   horizontal: AppSpacing.padding,
                   vertical: AppSpacing.padding,
                 ),
-                itemCount: gameMenuItems.length,
-                separatorBuilder: (_, index) => AnimatedContainer(
-                  duration: AppAnimations.duration,
-                  curve: AppAnimations.curve,
-                  height: _expanded[index]["type"]! ? 0 : AppSpacing.spacing,
-                ),
+                itemCount: _games.length,
+                separatorBuilder: (_, _) =>
+                    SizedBox(height: AppSpacing.spacing),
                 itemBuilder: (_, index) => _buildGameCard(index),
               ),
             ),
@@ -157,50 +177,156 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // --- Card builders ---
 
-  Widget _buildGameCard(int gameIndex) {
-    final game = gameMenuItems[gameIndex];
-    final isExpanded = _expanded[gameIndex]["type"]!;
-
-    final gameCard = GestureDetector(
-      onTap: () => setState(() {
-        final opening = !isExpanded;
-        _expanded[gameIndex]["type"] = opening;
-        if (!opening) _expanded[gameIndex]["online"] = false;
-      }),
-      child: BaseCard(
-        icon: game.icon,
-        trailingIcon: _buildChevron(isExpanded),
-        title: game.title,
-        backgroundColor: AppColors.primary,
-        iconBackgroundColor: AppColors.secondary.withAlpha(153),
-        boxShadow: AppShadows.boxLayered,
-      ),
-    );
+  Widget _buildGameCard(int index) {
+    final game = _games[index];
+    final state = _expansionStates[index];
 
     return AnimatedExpandable(
-      header: gameCard,
-      isExpanded: isExpanded,
-      child: _buildGameTypeOptions(gameIndex),
+      isExpanded: state.gameTypeExpanded,
+      header: _TappableCard(
+        title: game.title,
+        icon: game.icon,
+        expanded: state.gameTypeExpanded,
+        backgroundColor: AppColors.primary,
+        iconBackgroundColor: AppColors.secondary.withAlpha(153),
+        onTap: () => _toggleGameType(index),
+      ),
+      child: _buildGameTypeOptions(index),
     );
   }
 
-  Widget _buildGameTypeOptions(int gameIndex) {
-    final isOnlineExpanded = _expanded[gameIndex]["online"]!;
+  Widget _buildGameTypeOptions(int index) {
+    final state = _expansionStates[index];
 
-    final rows = gameplayOptions.map((option) {
-      final isOnline = option.title == 'Online';
-      return _buildExpandableRow(
-        item: option,
-        expanded: isOnline && isOnlineExpanded,
-        onTap: isOnline
-            ? () => setState(
-                () => _expanded[gameIndex]["online"] = !isOnlineExpanded,
-              )
-            : () {}, // TODO: handle Single Player / Pass and Play navigation
-      );
-    }).toList();
+    final onlineCard = _TappableCard(
+      title: 'Online',
+      icon: SFIcons.sf_person_line_dotted_person_fill,
+      style: AppTextStyles.body,
+      expanded: state.onlineExpanded,
+      onTap: () => _toggleOnline(index),
+      borderRadius: 0,
+    );
 
-    final gameTypeMenu = Container(
+    return Stack(
+      alignment: .topCenter,
+      children: [
+        Column(
+          children: [
+            SizeHolder(child: onlineCard),
+            SizeHolder(child: onlineCard),
+            AnimatedExpandable(
+              isExpanded: state.onlineExpanded,
+              header: SizeHolder(child: onlineCard),
+              child: _SubMenu(
+                widthFactor: 0.80,
+                children: [
+                  _TappableCard(
+                    title: 'Start Game',
+                    icon: SFIcons.sf_play_fill,
+                    style: AppTextStyles.body,
+                    trailingIcon: Icons.keyboard_arrow_right,
+                    onTap: () {}, // TODO: handle navigation
+                    borderRadius: 0,
+                  ),
+                  _TappableCard(
+                    title: 'Join Game',
+                    icon: SFIcons.sf_plus,
+                    style: AppTextStyles.body,
+                    trailingIcon: Icons.keyboard_arrow_right,
+                    onTap: () {}, // TODO: handle navigation
+                    borderRadius: 0,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        _SubMenu(
+          widthFactor: 0.90,
+          children: [
+            _TappableCard(
+              title: 'Single Player',
+              icon: SFIcons.sf_person_fill,
+              style: AppTextStyles.body,
+              onTap: () {}, // TODO: handle navigation
+              borderRadius: 0,
+            ),
+            _TappableCard(
+              title: 'Pass and Play',
+              icon: SFIcons.sf_person_3_fill,
+              style: AppTextStyles.body,
+              onTap: () {}, // TODO: handle navigation
+              borderRadius: 0,
+            ),
+            onlineCard,
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Private reusable widgets
+// ---------------------------------------------------------------------------
+
+/// A [BaseCard] wrapped in a [GestureDetector], with sensible defaults that
+/// match the app's visual style.
+class _TappableCard extends StatelessWidget {
+  const _TappableCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    this.style,
+    this.expanded = false,
+    this.backgroundColor = AppColors.secondary,
+    this.borderRadius = AppContainerConstraints.borderRadius,
+    this.iconBackgroundColor,
+    this.trailingIcon,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+  final TextStyle? style;
+  final bool expanded;
+  final Color backgroundColor;
+  final double borderRadius;
+  final Color? iconBackgroundColor;
+
+  /// Provide a custom trailing icon; defaults to [AnimatedChevron].
+  final dynamic trailingIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: BaseCard(
+        title: title,
+        icon: icon,
+        style: style,
+        trailingIcon: trailingIcon ?? AnimatedChevron(expanded: expanded),
+        backgroundColor: backgroundColor,
+        iconBackgroundColor: iconBackgroundColor,
+        boxShadow: AppShadows.boxLayered,
+        borderRadius: borderRadius,
+      ),
+    );
+  }
+}
+
+/// A visually grouped column of sub-menu cards clipped with rounded bottom
+/// corners and a white separator at the top.
+class _SubMenu extends StatelessWidget {
+  const _SubMenu({required this.children, required this.widthFactor});
+
+  final List<Widget> children;
+  final double widthFactor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: AppShadows.boxLayered,
@@ -208,73 +334,15 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
         child: FractionallySizedBox(
-          widthFactor: 0.90,
+          widthFactor: widthFactor,
           child: Column(
             children: [
               Container(height: 2, color: Colors.white),
-              ...rows,
+              ...children,
             ],
           ),
         ),
       ),
     );
-
-    return Stack(
-      children: [
-        if (isOnlineExpanded) _buildOnlineOptions(gameTypeMenu),
-        gameTypeMenu,
-      ],
-    );
   }
-
-  Widget _buildOnlineOptions(Widget placeholder) {
-    return Column(
-      children: [
-        // Reserves the height of the gameTypeMenu above the online options
-        Visibility(
-          visible: false,
-          maintainSize: true,
-          maintainState: true,
-          maintainAnimation: true,
-          child: placeholder,
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: AppShadows.boxLayered,
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(12),
-            ),
-            child: FractionallySizedBox(
-              widthFactor: 0.80,
-              child: Column(
-                children: [
-                  Container(height: 2, color: Colors.white),
-                  ...onlineOptions.map(
-                    (option) => BaseCard(
-                      title: option.title,
-                      icon: option.icon,
-                      trailingIcon: Icons.keyboard_arrow_right,
-                      backgroundColor: AppColors.secondary,
-                      boxShadow: AppShadows.boxLayered,
-                      borderRadius: 0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class CardItemModel {
-  final String title;
-  final IconData icon;
-
-  CardItemModel({required this.title, required this.icon});
 }
