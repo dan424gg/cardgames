@@ -96,8 +96,8 @@ class AppTheme {
 }
 
 class AppAnimations {
-  static const duration = Duration(milliseconds: 400);
-  static const curve = Curves.fastOutSlowIn;
+  static const duration = Duration(milliseconds: 600);
+  static const curve = Curves.easeInOut;
 }
 
 class AppContainerConstraints {

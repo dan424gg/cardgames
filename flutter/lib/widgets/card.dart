@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'package:app/widgets/icon_box.dart';
+import 'package:flutter_sficon/flutter_sficon.dart';
+
 
 class BaseCard extends StatefulWidget {
-  final IconData? icon;
+  final IconData icon;
   final dynamic trailingIcon;
   final Color? iconBackgroundColor;
   final String title;
@@ -14,7 +17,7 @@ class BaseCard extends StatefulWidget {
 
   const BaseCard({
     super.key,
-    this.icon,
+    this.icon = SFIcons.sf_person_fill,
     this.trailingIcon,
     required this.title,
     this.subtitle,
@@ -42,7 +45,10 @@ class _BaseCardState extends State<BaseCard> {
       child: Row(
         children: [
           if (widget.icon != null) ...[
-            _buildIconBox(),
+            IconBox(
+              icon: widget.icon,
+              backgroundColor: widget.iconBackgroundColor,
+            ),
             const SizedBox(width: 10),
           ],
           Expanded(
@@ -67,20 +73,6 @@ class _BaseCardState extends State<BaseCard> {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildIconBox() {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color:
-            widget.iconBackgroundColor ??
-            AppColors.primary.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(widget.icon, size: 16, color: AppColors.textPrimary),
     );
   }
 }
