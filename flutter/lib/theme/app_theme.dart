@@ -57,7 +57,7 @@ class AppTextStyles {
   );
 
   static final title = _base.copyWith(fontSize: 60, letterSpacing: 1.5);
-  static final pageTitle = _base.copyWith(fontSize: 22, letterSpacing: 1.2);
+  static final pageTitle = _base.copyWith(fontSize: 35, letterSpacing: 1.2);
   static final sectionHeader = _base.copyWith(fontSize: 14, letterSpacing: 1.0);
 
   static final body = GoogleFonts.inter(

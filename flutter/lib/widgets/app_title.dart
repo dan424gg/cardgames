@@ -5,8 +5,14 @@ import '../theme/app_theme.dart';
 class AppTitle extends StatelessWidget {
   final String text;
   final TextStyle style;
+  final double strokeWidth;
 
-  const AppTitle({super.key, required this.text, required this.style});
+  const AppTitle({
+    super.key,
+    required this.text,
+    required this.style,
+    this.strokeWidth = 2,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +40,7 @@ class AppTitle extends StatelessWidget {
           style: style.copyWith(
             foreground: Paint()
               ..style = PaintingStyle.stroke
-              ..strokeWidth = 2
+              ..strokeWidth = strokeWidth
               ..color = Colors.black,
           ),
           textAlign: TextAlign.center,
