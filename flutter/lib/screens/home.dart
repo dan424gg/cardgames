@@ -105,23 +105,26 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: GestureDetector(
-        onTap: () {
-          context.router.pushNamed('/settings');
-        },
-        child: SizedBox(
-          width: 200,
-          child: BaseCard(
-            title: "Settings",
-            backgroundColor: Colors.grey.shade300,
-            iconBackgroundColor: AppColors.iconBackgroundColor,
-            icon: SFIcons.sf_gearshape_fill,
-            trailingIcon: null,
-            boxShadow: AppShadows.boxLayered,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(top: 15),
+        child: GestureDetector(
+          onTap: () {
+            context.router.pushNamed('/settings');
+          },
+          child: SizedBox(
+            width: 200,
+            child: BaseCard(
+              title: "Settings",
+              backgroundColor: Colors.grey.shade300,
+              iconBackgroundColor: AppColors.iconBackgroundColor,
+              icon: SFIcons.sf_gearshape_fill,
+              trailingIcon: null,
+              boxShadow: AppShadows.boxLayered,
+            ),
           ),
         ),
       ),
-      floatingActionButtonLocation: .startFloat,
+      floatingActionButtonLocation: .endTop,
       backgroundColor: Colors.transparent,
       body: SafeArea(child: _buildLayout()),
     );
