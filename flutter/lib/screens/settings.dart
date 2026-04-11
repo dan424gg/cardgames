@@ -5,6 +5,7 @@ import '../widgets/app_title.dart';
 import '../widgets/card.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage(name: 'Settings')
 class SettingsScreen extends StatefulWidget {
@@ -15,7 +16,41 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool light = false;
+  bool allowMusic = true;
+  bool allowMotion = true;
+
+  void _loadData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      allowMusic = prefs.getBool("allow_music") ?? true;
+      allowMotion = prefs.getBool("allow_motion") ?? true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void updateAllowMusic(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("allow_music", value);
+
+    setState(() {
+      allowMusic = value;
+    });
+  }
+
+  void updateAllowMotion(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("allow_motion", value);
+
+    setState(() {
+      allowMotion = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,30 +98,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           title: "Music",
                           subTitle: "Toggle in-game music",
                           trailingIcon: Switch(
-                            value: light,
+                            value: allowMusic,
                             trackOutlineWidth:
                                 WidgetStateProperty.resolveWith<double?>(
                                   (_) => 1.0,
                                 ),
                             activeThumbColor: Colors.white,
                             activeTrackColor: Colors.green,
-                            onChanged: (bool value) =>
-                                setState(() => light = value),
+                            onChanged: (bool value) => updateAllowMusic(value),
                           ),
                         ),
                         ChildCard(
                           title: "Motion",
                           subTitle: "Toggle motion (ie. background suits)",
                           trailingIcon: Switch(
-                            value: light,
+                            value: allowMotion,
                             trackOutlineWidth:
                                 WidgetStateProperty.resolveWith<double?>(
                                   (_) => 1.0,
                                 ),
                             activeThumbColor: Colors.white,
                             activeTrackColor: Colors.green,
-                            onChanged: (bool value) =>
-                                setState(() => light = value),
+                            onChanged: (bool value) => updateAllowMotion(value),
                           ),
                         ),
                       ],
