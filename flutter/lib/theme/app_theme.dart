@@ -48,6 +48,7 @@ class AppColors {
   static const textSecondary = Color(0xFF6B6B6B);
   static const divider = Color(0xC6C6C8C8);
   static const toggleActive = Color(0xFF4CAF50);
+  static const iconBackgroundColor = Color.fromRGBO(255, 255, 255, 0.6);
 }
 
 class AppTextStyles {

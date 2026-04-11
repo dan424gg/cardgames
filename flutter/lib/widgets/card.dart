@@ -81,3 +81,91 @@ class _BaseCardState extends State<BaseCard> {
     );
   }
 }
+
+class HeaderCard {
+  final String title;
+  final IconData icon;
+  final Color backgroundColor;
+  final Color iconBackgroundColor;
+  final Widget? trailingIcon;
+
+  const HeaderCard({
+    required this.title,
+    required this.icon,
+    this.backgroundColor = AppColors.primary,
+    this.iconBackgroundColor = AppColors.iconBackgroundColor,
+    this.trailingIcon,
+  });
+}
+
+class ChildCard {
+  final String title;
+  final String? subTitle;
+  final IconData? icon;
+  final Widget? trailingIcon;
+  final VoidCallback? onTap;
+
+  const ChildCard({
+    required this.title,
+    this.subTitle,
+    this.icon,
+    this.trailingIcon,
+    this.onTap,
+  });
+}
+
+class GroupedCard extends StatelessWidget {
+  final HeaderCard header;
+  final List<ChildCard> children;
+  final double borderRadius;
+  final Color? dividerColor;
+
+  const GroupedCard({
+    super.key,
+    required this.header,
+    this.children = const [],
+    this.borderRadius = 12,
+    this.dividerColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: AppShadows.boxLayered,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BaseCard(
+              borderRadius: 0,
+              title: header.title,
+              icon: header.icon,
+              backgroundColor: header.backgroundColor,
+              iconBackgroundColor: header.iconBackgroundColor,
+              trailingIcon: header.trailingIcon,
+            ),
+            ...children.expand(
+              (child) => [
+                Divider(color: dividerColor ?? AppColors.divider, height: 0),
+                GestureDetector(
+                  onTap: child.onTap,
+                  child: BaseCard(
+                    borderRadius: 0,
+                    title: child.title,
+                    subTitle: child.subTitle,
+                    icon: child.icon,
+                    trailingIcon: child.trailingIcon,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

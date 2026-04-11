@@ -53,135 +53,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   spacing: AppSpacing.spacing,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: AppShadows.boxLayered,
+                    GroupedCard(
+                      header: HeaderCard(
+                        title: "Sounds",
+                        icon: SFIcons.sf_speaker_wave_3_fill,
                       ),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Sounds",
-                              icon: SFIcons.sf_speaker_wave_3_fill,
-                              backgroundColor: AppColors.primary,
-                              iconBackgroundColor: AppColors.secondary
-                                  .withAlpha(153),
-                              trailingIcon: null,
-                            ),
-                            Divider(color: AppColors.divider, height: 0),
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Music",
-                              subTitle: "Toggle in-game music",
-                              trailingIcon: Switch(
-                                value: light,
-                                trackOutlineWidth:
-                                    WidgetStateProperty.resolveWith<double?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      return 1.0;
-                                    }),
-                                activeThumbColor: Colors.white,
-                                activeTrackColor: Colors.green,
-                                onChanged: (bool value) {
-                                  setState(() {
-                                    light = value;
-                                  });
-                                },
-                              ),
-                            ),
-                            Divider(color: AppColors.divider, height: 0),
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Motion",
-                              subTitle: "Toggle motion (ie. background suits)",
-                              trailingIcon: Switch(
-                                value: light,
-                                trackOutlineWidth:
-                                    WidgetStateProperty.resolveWith<double?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      return 1.0;
-                                    }),
-                                activeThumbColor: Colors.white,
-                                activeTrackColor: Colors.green,
-                                onChanged: (bool value) {
-                                  setState(() {
-                                    light = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: AppShadows.boxLayered,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Sign In",
-                              icon: SFIcons.sf_checkmark_circle_fill,
-                              backgroundColor: AppColors.primary,
-                              iconBackgroundColor: AppColors.secondary
-                                  .withAlpha(153),
-                              trailingIcon: null,
-                            ),
-                            Divider(color: AppColors.divider, height: 0),
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Google",
-                              icon: SFIcons.sf_g_circle_fill,
-                            ),
-                            Divider(color: AppColors.divider, height: 0),
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Facebook",
-                              icon: SFIcons.sf_f_circle_fill,
-                            ),
-                            Divider(color: AppColors.divider, height: 0),
-                            BaseCard(
-                              borderRadius: 0,
-                              title: "Email",
-                              icon: SFIcons.sf_mail_fill,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: AppShadows.boxLayered,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(12),
-                        ),
-                        child: BaseCard(
-                          title: "Buy me a Coffee",
-                          icon: SFIcons.sf_cup_and_heat_waves_fill,
-                          backgroundColor: AppColors.primary,
-                          iconBackgroundColor: AppColors.secondary.withAlpha(
-                            153,
+                      children: [
+                        ChildCard(
+                          title: "Music",
+                          subTitle: "Toggle in-game music",
+                          trailingIcon: Switch(
+                            value: light,
+                            trackOutlineWidth:
+                                WidgetStateProperty.resolveWith<double?>(
+                                  (_) => 1.0,
+                                ),
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: Colors.green,
+                            onChanged: (bool value) =>
+                                setState(() => light = value),
                           ),
                         ),
+                        ChildCard(
+                          title: "Motion",
+                          subTitle: "Toggle motion (ie. background suits)",
+                          trailingIcon: Switch(
+                            value: light,
+                            trackOutlineWidth:
+                                WidgetStateProperty.resolveWith<double?>(
+                                  (_) => 1.0,
+                                ),
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: Colors.green,
+                            onChanged: (bool value) =>
+                                setState(() => light = value),
+                          ),
+                        ),
+                      ],
+                    ),
+                    GroupedCard(
+                      header: HeaderCard(
+                        title: "Sign In",
+                        icon: SFIcons.sf_checkmark_circle_fill,
+                      ),
+                      children: [
+                        ChildCard(
+                          title: "Google",
+                          icon: SFIcons.sf_g_circle_fill,
+                        ),
+                        ChildCard(
+                          title: "Facebook",
+                          icon: SFIcons.sf_f_circle_fill,
+                        ),
+                        ChildCard(title: "Email", icon: SFIcons.sf_mail_fill),
+                      ],
+                    ),
+                    GroupedCard(
+                      header: HeaderCard(
+                        title: "Buy me a Coffee",
+                        icon: SFIcons.sf_cup_and_heat_waves_fill,
                       ),
                     ),
                   ],

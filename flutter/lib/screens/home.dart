@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: BaseCard(
             title: "Settings",
             backgroundColor: Colors.grey.shade300,
-            iconBackgroundColor: AppColors.secondary.withAlpha(153),
+            iconBackgroundColor: AppColors.iconBackgroundColor,
             icon: SFIcons.sf_gearshape_fill,
             trailingIcon: null,
             boxShadow: AppShadows.boxLayered,
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: game.icon,
         expanded: state.gameTypeExpanded,
         backgroundColor: AppColors.primary,
-        iconBackgroundColor: AppColors.secondary.withAlpha(153),
+        iconBackgroundColor: AppColors.iconBackgroundColor,
         onTap: () => _toggleGameType(index),
       ),
       child: _buildGameTypeOptions(index),
