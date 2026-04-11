@@ -39,38 +39,44 @@ class BaseCard extends StatefulWidget {
 class _BaseCardState extends State<BaseCard> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        boxShadow: widget.boxShadow,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      child: Row(
-        children: [
-          if (widget.icon != null) ...[
-            IconBox(
-              icon: widget.icon!,
-              backgroundColor: widget.iconBackgroundColor,
+    return SizedBox(
+      height: 70,
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.backgroundColor,
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          boxShadow: widget.boxShadow,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: Row(
+          children: [
+            if (widget.icon != null) ...[
+              IconBox(
+                icon: widget.icon!,
+                backgroundColor: widget.iconBackgroundColor,
+              ),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.title,
+                    style: widget.style ?? AppTextStyles.label,
+                  ),
+                  if (widget.subTitle != null)
+                    Text(widget.subTitle!, style: AppTextStyles.bodySmall),
+                ],
+              ),
             ),
-            const SizedBox(width: 10),
+            if (widget.trailingIcon is Widget)
+              widget.trailingIcon
+            else
+              SizedBox.shrink(),
           ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(widget.title, style: widget.style ?? AppTextStyles.label),
-                if (widget.subTitle != null)
-                  Text(widget.subTitle!, style: AppTextStyles.bodySmall),
-              ],
-            ),
-          ),
-          if (widget.trailingIcon is Widget)
-            widget.trailingIcon
-          else
-            SizedBox.shrink(),
-        ],
+        ),
       ),
     );
   }

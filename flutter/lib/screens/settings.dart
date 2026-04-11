@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Padding(
-          padding: .only(top: 10),
+          padding: .only(top: 15),
           child: AppTitle(
             text: 'Settings',
             style: AppTextStyles.pageTitle,
@@ -33,7 +33,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: Container(
         alignment: .topCenter,
-        // child: Center(
         child: SizedBox(
           width: 400,
           child: ScrollConfiguration(
@@ -174,7 +173,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            // ),
           ),
         ),
       ),
