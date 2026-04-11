@@ -135,15 +135,18 @@ class _HomeScreenState extends State<HomeScreen> {
               child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
             ),
             Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.padding,
-                  vertical: AppSpacing.padding,
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(
+                  context,
+                ).copyWith(scrollbars: false),
+                child: ListView.separated(
+                  padding: EdgeInsets.all(AppSpacing.padding),
+                  physics: const ClampingScrollPhysics(),
+                  itemCount: _games.length,
+                  separatorBuilder: (_, _) =>
+                      SizedBox(height: AppSpacing.spacing),
+                  itemBuilder: (_, index) => _buildGameCard(index),
                 ),
-                itemCount: _games.length,
-                separatorBuilder: (_, _) =>
-                    SizedBox(height: AppSpacing.spacing),
-                itemBuilder: (_, index) => _buildGameCard(index),
               ),
             ),
           ],

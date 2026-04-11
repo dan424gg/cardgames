@@ -3,13 +3,12 @@ import '../../theme/app_theme.dart';
 import 'package:app/widgets/icon_box.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 
-
 class BaseCard extends StatefulWidget {
-  final IconData icon;
+  final IconData? icon;
   final dynamic trailingIcon;
   final Color? iconBackgroundColor;
   final String title;
-  final String? subtitle;
+  final String? subTitle;
   final TextStyle? style;
   final Color backgroundColor;
   final List<BoxShadow>? boxShadow;
@@ -17,10 +16,15 @@ class BaseCard extends StatefulWidget {
 
   const BaseCard({
     super.key,
-    this.icon = SFIcons.sf_person_fill,
-    this.trailingIcon,
+    this.icon,
+    this.trailingIcon = const Icon(
+      Icons.arrow_forward_ios_sharp,
+      size: 16,
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+    ),
     required this.title,
-    this.subtitle,
+    this.subTitle,
     this.style,
     this.backgroundColor = AppColors.secondary,
     this.iconBackgroundColor,
@@ -46,7 +50,7 @@ class _BaseCardState extends State<BaseCard> {
         children: [
           if (widget.icon != null) ...[
             IconBox(
-              icon: widget.icon,
+              icon: widget.icon!,
               backgroundColor: widget.iconBackgroundColor,
             ),
             const SizedBox(width: 10),
@@ -57,20 +61,15 @@ class _BaseCardState extends State<BaseCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(widget.title, style: widget.style ?? AppTextStyles.label),
-                if (widget.subtitle != null)
-                  Text(widget.subtitle!, style: AppTextStyles.bodySmall),
+                if (widget.subTitle != null)
+                  Text(widget.subTitle!, style: AppTextStyles.bodySmall),
               ],
             ),
           ),
           if (widget.trailingIcon is Widget)
             widget.trailingIcon
           else
-            Icon(
-              Icons.arrow_forward_ios_sharp,
-              size: 16,
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
+            SizedBox.shrink(),
         ],
       ),
     );

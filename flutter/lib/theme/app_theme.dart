@@ -46,7 +46,7 @@ class AppColors {
   static const teamBAccent = Color(0xFFD94A90);
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF6B6B6B);
-  static const divider = Color(0xFFE0E0E0);
+  static const divider = Color(0xC6C6C8C8);
   static const toggleActive = Color(0xFF4CAF50);
 }
 
