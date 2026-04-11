@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_title.dart';
 import '../widgets/card.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
+import 'package:auto_route/auto_route.dart';
 
 @RoutePage(name: 'Settings')
 class SettingsScreen extends StatefulWidget {
@@ -21,6 +22,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(SFIcons.sf_chevron_backward),
+          onPressed: () {
+            context.router.maybePop();
+          },
+        ),
         title: Padding(
           padding: .only(top: 15),
           child: AppTitle(
