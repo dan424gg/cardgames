@@ -5,7 +5,8 @@ import 'package:flutter_sficon/flutter_sficon.dart';
 
 class BaseCard extends StatefulWidget {
   final IconData? icon;
-  final dynamic trailingIcon;
+  final Widget trailingIcon;
+  final bool showTrailingIcon;
   final Color? iconBackgroundColor;
   final String title;
   final String? subTitle;
@@ -13,6 +14,7 @@ class BaseCard extends StatefulWidget {
   final Color backgroundColor;
   final List<BoxShadow>? boxShadow;
   final double borderRadius;
+  final VoidCallback? onTap;
 
   const BaseCard({
     super.key,
@@ -23,6 +25,7 @@ class BaseCard extends StatefulWidget {
       color: Colors.black,
       fontWeight: FontWeight.bold,
     ),
+    this.showTrailingIcon = true,
     required this.title,
     this.subTitle,
     this.style,
@@ -30,6 +33,7 @@ class BaseCard extends StatefulWidget {
     this.iconBackgroundColor,
     this.boxShadow,
     this.borderRadius = 12,
+    this.onTap,
   });
 
   @override
@@ -41,90 +45,58 @@ class _BaseCardState extends State<BaseCard> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 70,
-      child: Container(
-        decoration: BoxDecoration(
-          color: widget.backgroundColor,
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: widget.boxShadow,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: Row(
-          children: [
-            if (widget.icon != null) ...[
-              IconBox(
-                icon: widget.icon!,
-                backgroundColor: widget.iconBackgroundColor,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            boxShadow: widget.boxShadow,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Row(
+            children: [
+              if (widget.icon != null) ...[
+                IconBox(
+                  icon: widget.icon!,
+                  backgroundColor: widget.iconBackgroundColor,
+                ),
+                const SizedBox(width: 10),
+              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: widget.style ?? AppTextStyles.label,
+                    ),
+                    if (widget.subTitle != null)
+                      Text(widget.subTitle!, style: AppTextStyles.bodySmall),
+                  ],
+                ),
               ),
-              const SizedBox(width: 10),
+              if (widget.showTrailingIcon) widget.trailingIcon,
             ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.title,
-                    style: widget.style ?? AppTextStyles.label,
-                  ),
-                  if (widget.subTitle != null)
-                    Text(widget.subTitle!, style: AppTextStyles.bodySmall),
-                ],
-              ),
-            ),
-            if (widget.trailingIcon is Widget)
-              widget.trailingIcon
-            else
-              SizedBox.shrink(),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class HeaderCard {
-  final String title;
-  final IconData icon;
-  final Color backgroundColor;
-  final Color iconBackgroundColor;
-  final Widget? trailingIcon;
-
-  const HeaderCard({
-    required this.title,
-    required this.icon,
-    this.backgroundColor = AppColors.primary,
-    this.iconBackgroundColor = AppColors.iconBackgroundColor,
-    this.trailingIcon,
-  });
-}
-
-class ChildCard {
-  final String title;
-  final String? subTitle;
-  final IconData? icon;
-  final Widget? trailingIcon;
-  final VoidCallback? onTap;
-
-  const ChildCard({
-    required this.title,
-    this.subTitle,
-    this.icon,
-    this.trailingIcon,
-    this.onTap,
-  });
-}
-
-class GroupedCard extends StatelessWidget {
-  final HeaderCard header;
-  final List<ChildCard> children;
-  final double borderRadius;
+class CardList extends StatelessWidget {
+  final BaseCard? header;
+  final List<BaseCard> children;
+  final BorderRadius borderRadius;
   final Color? dividerColor;
 
-  const GroupedCard({
+  const CardList({
     super.key,
-    required this.header,
+    this.header,
     this.children = const [],
-    this.borderRadius = 12,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.dividerColor,
   });
 
@@ -132,35 +104,19 @@ class GroupedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: borderRadius,
         boxShadow: AppShadows.boxLayered,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+        borderRadius: borderRadius,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BaseCard(
-              borderRadius: 0,
-              title: header.title,
-              icon: header.icon,
-              backgroundColor: header.backgroundColor,
-              iconBackgroundColor: header.iconBackgroundColor,
-              trailingIcon: header.trailingIcon,
-            ),
+            header != null ? header! : SizedBox.shrink(),
             ...children.expand(
               (child) => [
                 Divider(color: dividerColor ?? AppColors.divider, height: 0),
-                GestureDetector(
-                  onTap: child.onTap,
-                  child: BaseCard(
-                    borderRadius: 0,
-                    title: child.title,
-                    subTitle: child.subTitle,
-                    icon: child.icon,
-                    trailingIcon: child.trailingIcon,
-                  ),
-                ),
+                child,
               ],
             ),
           ],

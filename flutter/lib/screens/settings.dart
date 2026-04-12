@@ -57,12 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(SFIcons.sf_chevron_backward),
-          onPressed: () {
-            context.router.maybePop();
-          },
-        ),
         title: Padding(
           padding: .only(top: 15),
           child: AppTitle(
@@ -88,13 +82,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   spacing: AppSpacing.spacing,
                   children: [
-                    GroupedCard(
-                      header: HeaderCard(
+                    CardList(
+                      header: BaseCard(
+                        backgroundColor: AppColors.primary,
+                        iconBackgroundColor: AppColors.iconBackgroundColor,
                         title: "Sounds",
                         icon: SFIcons.sf_speaker_wave_3_fill,
+                        showTrailingIcon: false,
+                        borderRadius: 0,
                       ),
                       children: [
-                        ChildCard(
+                        BaseCard(
+                          borderRadius: 0,
                           title: "Music",
                           subTitle: "Toggle in-game music",
                           trailingIcon: Switch(
@@ -108,7 +107,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: (bool value) => updateAllowMusic(value),
                           ),
                         ),
-                        ChildCard(
+                        BaseCard(
+                          borderRadius: 0,
                           title: "Motion",
                           subTitle: "Toggle motion (ie. background suits)",
                           trailingIcon: Switch(
@@ -124,28 +124,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    GroupedCard(
-                      header: HeaderCard(
+                    CardList(
+                      header: BaseCard(
+                        borderRadius: 0,
+                        backgroundColor: AppColors.primary,
+                        iconBackgroundColor: AppColors.iconBackgroundColor,
                         title: "Sign In",
                         icon: SFIcons.sf_checkmark_circle_fill,
+                        showTrailingIcon: false,
                       ),
                       children: [
-                        ChildCard(
+                        BaseCard(
+                          borderRadius: 0,
                           title: "Google",
                           icon: SFIcons.sf_g_circle_fill,
                         ),
-                        ChildCard(
+                        BaseCard(
+                          borderRadius: 0,
                           title: "Facebook",
                           icon: SFIcons.sf_f_circle_fill,
                         ),
-                        ChildCard(title: "Email", icon: SFIcons.sf_mail_fill),
+                        BaseCard(
+                          title: "Email",
+                          icon: SFIcons.sf_mail_fill,
+                          borderRadius: 0,
+                        ),
                       ],
                     ),
-                    GroupedCard(
-                      header: HeaderCard(
-                        title: "Buy me a Coffee",
-                        icon: SFIcons.sf_cup_and_heat_waves_fill,
-                      ),
+                    BaseCard(
+                      borderRadius: 12,
+                      backgroundColor: AppColors.primary,
+                      iconBackgroundColor: AppColors.iconBackgroundColor,
+                      title: "Buy me a Coffee",
+                      icon: SFIcons.sf_cup_and_heat_waves_fill,
+                      boxShadow: AppShadows.boxLayered,
                     ),
                   ],
                 ),

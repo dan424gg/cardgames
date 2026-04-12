@@ -7,27 +7,27 @@ class AppSpacing {
 }
 
 class AppShadows {
-  static final List<BoxShadow> boxLayered = [
+  static const List<BoxShadow> boxLayered = [
     BoxShadow(
-      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      color: Color.fromRGBO(0, 0, 0, .15),
       offset: const Offset(-1, 2),
       blurRadius: 4,
     ),
     BoxShadow(
-      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      color: Color.fromRGBO(0, 0, 0, .15),
       offset: const Offset(1, 2),
       blurRadius: 4,
     ),
   ];
 
-  static final List<Shadow> textLayered = [
+  static const List<Shadow> textLayered = [
     Shadow(
-      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      color: Color.fromRGBO(0, 0, 0, .15),
       offset: const Offset(-1, 2),
       blurRadius: 4,
     ),
     Shadow(
-      color: Colors.black.withAlpha((0.1 * 255).toInt()),
+      color: Color.fromRGBO(0, 0, 0, .15),
       offset: const Offset(1, 2),
       blurRadius: 4,
     ),
