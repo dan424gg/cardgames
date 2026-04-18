@@ -57,6 +57,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  void toggleSignInExpanded() {
+    setState(() {
+      signUpExpanded = false;
+      signInExpanded = !signInExpanded;
+    });
+  }
+
+  void toggleSignUpExpanded() {
+    setState(() {
+      signInExpanded = false;
+      signUpExpanded = !signUpExpanded;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,9 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: "Sign In",
                         icon: SFIcons.sf_checkmark_circle_fill,
                         trailingIcon: AnimatedChevron(expanded: signInExpanded),
-                        onTap: () => setState(() {
-                          signInExpanded = !signInExpanded;
-                        }),
+                        onTap: toggleSignInExpanded,
                         boxShadow: AppShadows.boxLayered,
                       ),
                       child: FractionallySizedBox(
@@ -178,9 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: "Sign Up",
                         icon: SFIcons.sf_checkmark_circle_fill,
                         trailingIcon: AnimatedChevron(expanded: signUpExpanded),
-                        onTap: () => setState(() {
-                          signUpExpanded = !signUpExpanded;
-                        }),
+                        onTap: toggleSignUpExpanded,
                         boxShadow: AppShadows.boxLayered,
                       ),
                       child: FractionallySizedBox(
@@ -213,8 +223,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     BaseCard(
                       borderRadius: 12,
-                      backgroundColor: AppColors.primary,
-                      iconBackgroundColor: AppColors.iconBackgroundColor,
                       title: "Buy me a Coffee",
                       icon: SFIcons.sf_cup_and_heat_waves_fill,
                       boxShadow: AppShadows.boxLayered,
