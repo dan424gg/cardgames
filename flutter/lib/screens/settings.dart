@@ -1,3 +1,4 @@
+import 'package:app/widgets/animated_chevron.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/annotations.dart';
 import '../theme/app_theme.dart';
@@ -6,6 +7,7 @@ import '../widgets/card.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../widgets/animated_expandable.dart';
 
 @RoutePage(name: 'Settings')
 class SettingsScreen extends StatefulWidget {
@@ -18,6 +20,9 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool allowMusic = true;
   bool allowMotion = true;
+
+  bool signInExpanded = false;
+  bool signUpExpanded = false;
 
   void _loadData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -124,32 +129,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    CardList(
+                    AnimatedExpandable(
+                      isExpanded: signInExpanded,
                       header: BaseCard(
-                        borderRadius: 0,
                         backgroundColor: AppColors.primary,
                         iconBackgroundColor: AppColors.iconBackgroundColor,
                         title: "Sign In",
                         icon: SFIcons.sf_checkmark_circle_fill,
-                        showTrailingIcon: false,
+                        trailingIcon: AnimatedChevron(expanded: signInExpanded),
+                        onTap: () => setState(() {
+                          signInExpanded = !signInExpanded;
+                        }),
+                        boxShadow: AppShadows.boxLayered,
                       ),
-                      children: [
-                        BaseCard(
-                          borderRadius: 0,
-                          title: "Google",
-                          icon: SFIcons.sf_g_circle_fill,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.9,
+                        child: CardList(
+                          borderRadius: .vertical(
+                            bottom: Radius.circular(
+                              AppContainerConstraints.borderRadius,
+                            ),
+                          ),
+                          children: [
+                            BaseCard(
+                              borderRadius: 0,
+                              title: "Google",
+                              icon: SFIcons.sf_g_circle_fill,
+                            ),
+                            BaseCard(
+                              borderRadius: 0,
+                              title: "Facebook",
+                              icon: SFIcons.sf_f_circle_fill,
+                            ),
+                            BaseCard(
+                              title: "Email",
+                              icon: SFIcons.sf_mail_fill,
+                              borderRadius: 0,
+                            ),
+                          ],
                         ),
-                        BaseCard(
-                          borderRadius: 0,
-                          title: "Facebook",
-                          icon: SFIcons.sf_f_circle_fill,
+                      ),
+                    ),
+                    AnimatedExpandable(
+                      isExpanded: signUpExpanded,
+                      header: BaseCard(
+                        backgroundColor: AppColors.primary,
+                        iconBackgroundColor: AppColors.iconBackgroundColor,
+                        title: "Sign Up",
+                        icon: SFIcons.sf_checkmark_circle_fill,
+                        trailingIcon: AnimatedChevron(expanded: signUpExpanded),
+                        onTap: () => setState(() {
+                          signUpExpanded = !signUpExpanded;
+                        }),
+                        boxShadow: AppShadows.boxLayered,
+                      ),
+                      child: FractionallySizedBox(
+                        widthFactor: 0.9,
+                        child: CardList(
+                          borderRadius: .vertical(
+                            bottom: Radius.circular(
+                              AppContainerConstraints.borderRadius,
+                            ),
+                          ),
+                          children: [
+                            BaseCard(
+                              borderRadius: 0,
+                              title: "Google",
+                              icon: SFIcons.sf_g_circle_fill,
+                            ),
+                            BaseCard(
+                              borderRadius: 0,
+                              title: "Facebook",
+                              icon: SFIcons.sf_f_circle_fill,
+                            ),
+                            BaseCard(
+                              title: "Email",
+                              icon: SFIcons.sf_mail_fill,
+                              borderRadius: 0,
+                            ),
+                          ],
                         ),
-                        BaseCard(
-                          title: "Email",
-                          icon: SFIcons.sf_mail_fill,
-                          borderRadius: 0,
-                        ),
-                      ],
+                      ),
                     ),
                     BaseCard(
                       borderRadius: 12,
