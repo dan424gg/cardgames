@@ -3,6 +3,7 @@ import '../widgets/animated_expandable.dart';
 import '../widgets/animated_chevron.dart';
 import '../widgets/card.dart';
 import '../theme/app_theme.dart';
+import '../widgets/error_snackbar.dart';
 import '../widgets/size_holder.dart';
 import '../widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
@@ -158,6 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (_, index) => _buildGameCard(index),
                 ),
               ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                showErrorSnackBar(
+                  context,
+                  message: "Online account is already linked, try a different account or sign out/in",
+                );
+              },
+              child: Text("Press me, c'mon please"),
             ),
           ],
         ),
