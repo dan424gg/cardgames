@@ -1,4 +1,5 @@
 import 'package:app/widgets/animated_chevron.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -89,53 +90,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<UserCredential?> signInWithGoogle() async {
     print("Signing in with Google...");
-    // Trigger the authentication flow
-    final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-        .authenticate();
 
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    final user = FirebaseAuth.instance.currentUser;
+    final anonymous = isAnonymous(user);
 
-    // Create a new credential
+    if (kIsWeb) {
+      final googleProvider = GoogleAuthProvider();
+      if (!anonymous) {
+        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      }
+      return await _linkWithErrorHandling(
+        () => user!.linkWithPopup(googleProvider),
+      );
+    }
+
+    // Native: build credential from GoogleSignIn
+    final googleUser = await GoogleSignIn.instance.authenticate();
+    final googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
     );
 
-    if (isAnonymous(FirebaseAuth.instance.currentUser)) {
-      // If signed in as anonymous user (guest), try to link guest account with permanent account
-      try {
-        return await FirebaseAuth.instance.currentUser!.linkWithCredential(
-          credential,
-        );
-      } on FirebaseAuthException catch (e) {
-        late String message;
-        switch (e.code) {
-          case "provider-already-linked":
-            message = ("The provider has already been linked to a user.");
-            break;
-          case "invalid-credential":
-            message = ("The provider's credential is not valid.");
-            break;
-          case "credential-already-in-use":
-            message =
-                ("The account corresponding to the credential already exists, or is already linked to a Firebase User.");
-            break;
-          // See the API reference for the full list of error codes.
-          default:
-            message = ("Unknown error.");
-        }
-
-        if (context.mounted) {
-          showErrorSnackBar(context, message: message);
-        } else {
-          print("Context isn't mounted???");
-        }
-
-        return null;
-      }
-    } else {
-      // Once signed in, return the UserCredential
+    if (!anonymous) {
       return await FirebaseAuth.instance.signInWithCredential(credential);
+    }
+
+    return await _linkWithErrorHandling(
+      () => user!.linkWithCredential(credential),
+    );
+  }
+
+  Future<UserCredential?> _linkWithErrorHandling(
+    Future<UserCredential> Function() linkFn,
+  ) async {
+    try {
+      return await linkFn();
+    } on FirebaseAuthException catch (e) {
+      final message = switch (e.code) {
+        "provider-already-linked" =>
+          "The provider has already been linked to a user.",
+        "invalid-credential" => "The provider's credential is not valid.",
+        "credential-already-in-use" =>
+          "The account corresponding to the credential already exists, or is already linked to a Firebase User.",
+        _ => "Unknown error.",
+      };
+
+      if (context.mounted) {
+        showErrorSnackBar(context, message: message);
+      } else {
+        print("Context isn't mounted???");
+      }
+
+      return null;
     }
   }
 
@@ -193,7 +199,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _deleteUser() async {
-    final user = await FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser;
 
     user?.delete();
   }
@@ -209,42 +215,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     late String provider;
 
     if (!isAnonymous(user)) {
-      for (final providerProfile in user!.providerData) {
-        provider = providerProfile.providerId;
-        break;
-      }
-
-      switch (provider) {
-        case "password":
-          provider = "Email";
-          break;
-        case "google.com":
-          provider = "Google";
-          break;
-        case "facebook.com":
-          provider = "Facebook";
-          break;
-        case "twitter.com":
-          provider = "X (Twitter)";
-          break;
-        case "github.com":
-          provider = "GitHub";
-          break;
-        case "apple.com":
-          provider = "Apple";
-          break;
-        case "phone":
-          provider = "Phone";
-          break;
-        case "firebase":
-          provider = "Guest";
-          break;
-      }
+      provider = user!.getProviders().join(', ');
     } else {
       provider = "Guest";
     }
 
-    return BaseCard(borderRadius: 0, title: "Provider", subTitle: provider);
+    return BaseCard(
+      borderRadius: 0,
+      title: provider.contains(',') ? "Providers" : "Provider",
+      subTitle: provider,
+    );
   }
 
   List<Widget> _buildAuthContent(User? user) {
@@ -305,12 +285,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: 0,
               title: "Google",
               icon: SFIcons.sf_g_circle_fill,
-              onTap: () => signInWithGoogle(),
-            ),
-            BaseCard(
-              borderRadius: 0,
-              title: "Facebook",
-              icon: SFIcons.sf_f_circle_fill,
+              onTap: () {
+                signInWithGoogle();
+              },
             ),
             BaseCard(
               title: "Email",
@@ -433,5 +410,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
         },
       ),
     );
+  }
+}
+
+extension UserExtensions on User {
+  List<String> getProviders() {
+    String getProvider(String rawProvider) {
+      switch (rawProvider) {
+        case "password":
+          return "Email";
+        case "google.com":
+          return "Google";
+        case "facebook.com":
+          return "Facebook";
+        case "twitter.com":
+          return "X (Twitter)";
+        case "github.com":
+          return "GitHub";
+        case "apple.com":
+          return "Apple";
+        case "phone":
+          return "Phone";
+        case "firebase":
+          return "Guest";
+        default:
+          return "Unknown";
+      }
+    }
+
+    List<String> providers = [];
+
+    for (final providerProfile in providerData) {
+      providers.add(getProvider(providerProfile.providerId));
+      break;
+    }
+
+    return providers;
   }
 }
