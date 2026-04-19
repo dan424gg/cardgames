@@ -3,6 +3,7 @@ import '../widgets/animated_expandable.dart';
 import '../widgets/animated_chevron.dart';
 import '../widgets/card.dart';
 import '../theme/app_theme.dart';
+import '../widgets/error_snackbar.dart';
 import '../widgets/size_holder.dart';
 import '../widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';

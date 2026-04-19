@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "621490707063",
+    "project_id": "cards-f0837",
+    "storage_bucket": "cards-f0837.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:621490707063:android:9ad4eecc30239bcd744472",
+        "android_client_info": {
+          "package_name": "com.danielwells.cardgames"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "621490707063-h844asmteiijlk1j7p2c7s8mp880lm3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZQ-mBrEzeG-6EudcYYAD9naRN_NtAZ0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "621490707063-h844asmteiijlk1j7p2c7s8mp880lm3s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "621490707063-d0kiljnv51siq50gl7p53h0lpu2nvf23.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.danielwells.cardgames"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

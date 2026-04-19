@@ -39,6 +39,10 @@ dependencies:
   window_manager: ^0.5.1
   auto_route: ^7.8.4
   shared_preferences: ^2.5.5
+  firebase_auth: ^6.4.0
+  firebase_core: ^4.7.0
+  google_sign_in: ^7.2.0
+  unique_names_generator: ^3.1.2
 
 dev_dependencies:
   flutter_test:
