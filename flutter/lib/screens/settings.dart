@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/animated_expandable.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../widgets/error_snackbar.dart';
+import 'package:unique_names_generator/unique_names_generator.dart';
 
 @RoutePage(name: 'Settings')
 class SettingsScreen extends StatefulWidget {
@@ -26,6 +27,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   bool signInExpanded = false;
   bool signUpExpanded = false;
+
+  final randomNameGenerator = UniqueNamesGenerator(
+    config: Config(
+      length: 2,
+      dictionaries: [adjectives, animals],
+      separator: "",
+      style: .capital,
+    ),
+  );
+
+  // Used for Guest sign ins
+  String? _pendingDisplayName;
 
   void _loadData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -113,10 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
 
         if (context.mounted) {
-          showErrorSnackBar(
-            context,
-            message: message,
-          );
+          showErrorSnackBar(context, message: message);
         } else {
           print("Context isn't mounted???");
         }
@@ -132,15 +142,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<UserCredential> signInAnonymously() async {
     print("Signing in anonymously...");
     final userCredential = await FirebaseAuth.instance.signInAnonymously();
+    setState(() => _pendingDisplayName = randomNameGenerator.generate());
 
     // Set display name to Guest
-    await userCredential.user?.updateDisplayName("Guest");
+    await userCredential.user?.updateDisplayName(_pendingDisplayName);
+    setState(() => _pendingDisplayName = null); // clear once real name is set
 
     return userCredential;
   }
 
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    final user = FirebaseAuth.instance.currentUser;
+    if (isAnonymous(user)) {
+      _checkDeleteUser(isAnonymous: true);
+    } else {
+      await FirebaseAuth.instance.signOut();
+    }
+  }
+
+  void _checkDeleteUser({bool isAnonymous = false}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm', style: AppTextStyles.label),
+          content: Text(
+            'This will remove all traces of the user and all game history.${(isAnonymous ? "\nIf you want to persist your data, link to an online account." : "")}',
+            style: AppTextStyles.body,
+            softWrap: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: AppTextStyles.body.copyWith(color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteUser();
+                Navigator.pop(context);
+              },
+              child: Text('OK', style: AppTextStyles.label),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteUser() async {
+    final user = await FirebaseAuth.instance.currentUser;
+
+    user?.delete();
   }
 
   bool isAnonymous(User? user) {
@@ -148,6 +203,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return false;
     }
     return user.isAnonymous;
+  }
+
+  BaseCard getProvider(User? user) {
+    late String provider;
+
+    if (!isAnonymous(user)) {
+      for (final providerProfile in user!.providerData) {
+        provider = providerProfile.providerId;
+        break;
+      }
+
+      switch (provider) {
+        case "password":
+          provider = "Email";
+          break;
+        case "google.com":
+          provider = "Google";
+          break;
+        case "facebook.com":
+          provider = "Facebook";
+          break;
+        case "twitter.com":
+          provider = "X (Twitter)";
+          break;
+        case "github.com":
+          provider = "GitHub";
+          break;
+        case "apple.com":
+          provider = "Apple";
+          break;
+        case "phone":
+          provider = "Phone";
+          break;
+        case "firebase":
+          provider = "Guest";
+          break;
+      }
+    } else {
+      provider = "Guest";
+    }
+
+    return BaseCard(borderRadius: 0, title: "Provider", subTitle: provider);
   }
 
   List<Widget> _buildAuthContent(User? user) {
@@ -166,18 +263,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             BaseCard(
               borderRadius: 0,
               title: "Display Name",
-              subTitle: user.displayName ?? "Not set",
+              subTitle: _pendingDisplayName ?? user.displayName ?? "Not set",
             ),
-            if (user.email != null)
-              BaseCard(borderRadius: 0, title: "Email", subTitle: user.email!),
+            getProvider(user),
             BaseCard(
               title: "Sign Out",
               icon: SFIcons.sf_arrowshape_left_fill,
               onTap: _signOut,
               borderRadius: 0,
-              backgroundColor: Colors.red.shade200,
-              iconBackgroundColor: AppColors.iconBackgroundColor,
             ),
+            if (!isAnonymous(user))
+              BaseCard(
+                title: "Delete Account",
+                icon: SFIcons.sf_x_circle_fill,
+                onTap: _checkDeleteUser,
+                borderRadius: 0,
+                backgroundColor: Colors.red.shade200,
+                iconBackgroundColor: AppColors.iconBackgroundColor,
+              ),
           ],
         ),
 

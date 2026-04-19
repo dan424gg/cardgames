@@ -160,15 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                showErrorSnackBar(
-                  context,
-                  message: "Online account is already linked, try a different account or sign out/in",
-                );
-              },
-              child: Text("Press me, c'mon please"),
-            ),
           ],
         ),
       ),
