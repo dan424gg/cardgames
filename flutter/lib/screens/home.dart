@@ -229,7 +229,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'Join Game',
                       icon: SFIcons.sf_plus,
                       style: AppTextStyles.body,
-                      onTap: () {}, // TODO: handle navigation
+                      onTap: () {
+                        context.router.pushNamed('/joingame');
+                      },
                       borderRadius: 0,
                     ),
                   ],

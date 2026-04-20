@@ -69,5 +69,19 @@ class AppRouter extends $AppRouter {
         );
       },
     ),
+    CustomRoute(
+      path: '/joingame',
+      page: JoinGame.page,
+      durationInMilliseconds: AppAnimations.duration.inMilliseconds,
+      reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return _buildSlideTransition(
+          slideDirection: const Offset(1.0, 0.0),
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
+    ),
   ];
 }

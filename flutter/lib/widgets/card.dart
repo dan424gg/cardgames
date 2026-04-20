@@ -8,13 +8,14 @@ class BaseCard extends StatefulWidget {
   final Widget trailingIcon;
   final bool showTrailingIcon;
   final Color? iconBackgroundColor;
-  final String title;
+  final String? title;
   final String? subTitle;
   final TextStyle? style;
   final Color backgroundColor;
   final List<BoxShadow>? boxShadow;
   final double borderRadius;
   final VoidCallback? onTap;
+  final Widget? content;
 
   const BaseCard({
     super.key,
@@ -26,7 +27,7 @@ class BaseCard extends StatefulWidget {
       fontWeight: FontWeight.bold,
     ),
     this.showTrailingIcon = true,
-    required this.title,
+    this.title,
     this.subTitle,
     this.style,
     this.backgroundColor = AppColors.secondary,
@@ -34,6 +35,7 @@ class BaseCard extends StatefulWidget {
     this.boxShadow,
     this.borderRadius = 12,
     this.onTap,
+    this.content,
   });
 
   @override
@@ -56,20 +58,21 @@ class _BaseCardState extends State<BaseCard> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           child: Row(
             children: [
-              if (widget.icon != null) ...[
-                IconBox(
-                  icon: widget.icon!,
-                  backgroundColor: widget.iconBackgroundColor,
-                ),
-                const SizedBox(width: 10),
-              ],
+              if (widget.content == null)
+                if (widget.icon != null) ...[
+                  IconBox(
+                    icon: widget.icon!,
+                    backgroundColor: widget.iconBackgroundColor,
+                  ),
+                  const SizedBox(width: 10),
+                ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.title,
+                      widget.title ?? "",
                       style: widget.style ?? AppTextStyles.label,
                     ),
                     if (widget.subTitle != null)
