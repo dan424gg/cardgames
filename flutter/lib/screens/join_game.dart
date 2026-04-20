@@ -48,39 +48,47 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
           alignment: .topCenter,
           child: SizedBox(
             width: 400,
-            child: SmartTextField(
-              mode: SmartTextFieldMode.pin,
-              pinLength: 6,
-              pinBoxSize: 48,
-              autoFocus: false,
-              animationCurve: Curves.fastEaseInToSlowEaseOut,
-              animationDuration: Duration(milliseconds: 400),
-              onPinCompleted: (pin) => print('PIN: $pin'),
+            child: CardList(
+              header: BaseCard(
+                backgroundColor: AppColors.primary,
+                iconBackgroundColor: AppColors.iconBackgroundColor,
+                title: "Game Code",
+                icon: SFIcons.sf_list_clipboard_fill,
+                showTrailingIcon: false,
+                borderRadius: 0,
+              ),
+              children: [
+                BaseCard(
+                  borderRadius: 0,
+                  content: Column(
+                    mainAxisAlignment: .center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: .center,
+                        children: [
+                          SmartTextField(
+                            mode: SmartTextFieldMode.pin,
+                            pinLength: 6,
+                            pinBoxSize: 48,
+                            autoFocus: false,
+                            animationCurve: AppAnimations.curve,
+                            animationDuration: AppAnimations.duration,
+                            onPinCompleted: (pin) => print('PIN: $pin'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  showTrailingIcon: false,
+                ),
+              ],
             ),
-            // child: CardList(
-            //   header: BaseCard(
-            //     backgroundColor: AppColors.primary,
-            //     iconBackgroundColor: AppColors.iconBackgroundColor,
-            //     title: "Game Code",
-            //     icon: SFIcons.sf_list_clipboard_fill,
-            //     showTrailingIcon: false,
-            //     borderRadius: 0,
-            //   ),
-            //   children: [
-            //     BaseCard(
-            //       borderRadius: 0,
-            //       content:
-            //       showTrailingIcon: false,
-            //     ),
-            //   ],
-            // ),
           ),
         ),
       ),
     );
   }
 }
-
 
 // ---------------------------------------------------------------------------
 // SmartTextField
@@ -200,33 +208,33 @@ class _SmartTextFieldState extends State<SmartTextField>
   Widget build(BuildContext context) {
     return switch (widget.mode) {
       SmartTextFieldMode.text => _TextInput(
-          focusNode: _focusNode,
-          controller: _controller,
-          hasFocus: _hasFocus,
-          hintText: widget.hintText,
-          obscureText: widget.obscureText,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          maxLines: widget.maxLines,
-          prefixIcon: widget.prefixIcon,
-          suffixIcon: widget.suffixIcon,
-          animationCurve: widget.animationCurve,
-          animationDuration: widget.animationDuration,
-          onChanged: widget.onChanged,
-          onSubmitted: widget.onSubmitted,
-        ),
+        focusNode: _focusNode,
+        controller: _controller,
+        hasFocus: _hasFocus,
+        hintText: widget.hintText,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        maxLines: widget.maxLines,
+        prefixIcon: widget.prefixIcon,
+        suffixIcon: widget.suffixIcon,
+        animationCurve: widget.animationCurve,
+        animationDuration: widget.animationDuration,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+      ),
       SmartTextFieldMode.pin => _PinInput(
-          focusNode: _focusNode,
-          controller: _controller,
-          hasFocus: _hasFocus,
-          pinLength: widget.pinLength,
-          boxSize: widget.pinBoxSize,
-          boxSpacing: widget.pinBoxSpacing,
-          animationCurve: widget.animationCurve,
-          animationDuration: widget.animationDuration,
-          onChanged: widget.onChanged,
-          onCompleted: widget.onPinCompleted,
-        ),
+        focusNode: _focusNode,
+        controller: _controller,
+        hasFocus: _hasFocus,
+        pinLength: widget.pinLength,
+        boxSize: widget.pinBoxSize,
+        boxSpacing: widget.pinBoxSpacing,
+        animationCurve: widget.animationCurve,
+        animationDuration: widget.animationDuration,
+        onChanged: widget.onChanged,
+        onCompleted: widget.onPinCompleted,
+      ),
     };
   }
 }
@@ -399,8 +407,9 @@ class _PinInputState extends State<_PinInput> {
       digits.length.clamp(0, widget.pinLength),
     );
     widget.controller.text = filled;
-    widget.controller.selection =
-        TextSelection.collapsed(offset: filled.length);
+    widget.controller.selection = TextSelection.collapsed(
+      offset: filled.length,
+    );
 
     widget.onChanged?.call(filled);
     if (filled.length == widget.pinLength) {
@@ -409,17 +418,14 @@ class _PinInputState extends State<_PinInput> {
   }
 
   void _showPasteMenu(BuildContext context, Offset globalPosition) {
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     showMenu<String>(
       context: context,
       position: RelativeRect.fromRect(
         globalPosition & Size.zero,
         Offset.zero & overlay.size,
       ),
-      items: const [
-        PopupMenuItem(value: 'paste', child: Text('Paste')),
-      ],
+      items: const [PopupMenuItem(value: 'paste', child: Text('Paste'))],
     ).then((value) {
       if (value == 'paste') _paste();
     });
@@ -540,17 +546,16 @@ class _PinBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final borderColor = switch ((isActive, isFilled)) {
-      (true, _) => colorScheme.primary,
-      (_, true) => colorScheme.primary.withOpacity(0.6),
-      _ => colorScheme.outline,
-    };
+    // final borderColor = switch ((isActive)) {
+    //   false => Color.fromRGBO(198, 198, 200, 1),
+    //   true => Colors.black,
+    // };
+
+    final borderColor = Color.fromRGBO(198, 198, 200, 1);
 
     final borderWidth = (isActive || isFilled) ? 2.0 : 1.0;
 
-    final bgColor = isFilled
-        ? colorScheme.primary.withOpacity(0.07)
-        : colorScheme.surface;
+    final bgColor = isActive ? Colors.white : Color.fromRGBO(242, 242, 247, 1);
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: isActive ? 1.0 : 0.0),
@@ -566,43 +571,24 @@ class _PinBox extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: borderColor, width: borderWidth),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.2 * ct),
-                blurRadius: 8 * ct,
-                spreadRadius: ct,
-              ),
-            ],
+            boxShadow: AppShadows.boxLayered,
           ),
           child: child,
         );
       },
       child: Center(
-        child: AnimatedSwitcher(
-          duration: animationDuration,
-          switchInCurve: animationCurve,
-          switchOutCurve: animationCurve,
-          transitionBuilder: (child, animation) => ScaleTransition(
-            scale: animation,
-            child: FadeTransition(opacity: animation, child: child),
-          ),
-          child: digit != null
-              ? Text(
-                  digit!,
-                  key: ValueKey(digit),
-                  style: TextStyle(
-                    fontSize: size * 0.42,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-                )
-              : isActive
-                  ? _Cursor(
-                      color: colorScheme.primary,
-                      animationDuration: animationDuration,
-                    )
-                  : const SizedBox.shrink(),
-        ),
+        child: digit != null
+            ? Text(
+                digit!,
+                style: AppTextStyles.body.copyWith(
+                  fontSize: size * 0.42,
+                  // fontWeight: FontWeight.w600,
+                  // color: colorScheme.onSurface,
+                ),
+              )
+            : isActive
+            ? _Cursor(color: Colors.black, animationDuration: animationDuration)
+            : const SizedBox.shrink(),
       ),
     );
   }
@@ -622,8 +608,7 @@ class _Cursor extends StatefulWidget {
   State<_Cursor> createState() => _CursorState();
 }
 
-class _CursorState extends State<_Cursor>
-    with SingleTickerProviderStateMixin {
+class _CursorState extends State<_Cursor> with SingleTickerProviderStateMixin {
   late final AnimationController _blink;
 
   @override

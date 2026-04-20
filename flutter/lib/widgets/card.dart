@@ -46,7 +46,7 @@ class _BaseCardState extends State<BaseCard> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 70,
+      height: widget.content != null ? null : 70,
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
@@ -56,33 +56,37 @@ class _BaseCardState extends State<BaseCard> {
             boxShadow: widget.boxShadow,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          child: Row(
-            children: [
-              if (widget.content == null)
-                if (widget.icon != null) ...[
-                  IconBox(
-                    icon: widget.icon!,
-                    backgroundColor: widget.iconBackgroundColor,
-                  ),
-                  const SizedBox(width: 10),
-                ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      widget.title ?? "",
-                      style: widget.style ?? AppTextStyles.label,
+          child:
+              widget.content ??
+              Row(
+                children: [
+                  if (widget.icon != null) ...[
+                    IconBox(
+                      icon: widget.icon!,
+                      backgroundColor: widget.iconBackgroundColor,
                     ),
-                    if (widget.subTitle != null)
-                      Text(widget.subTitle!, style: AppTextStyles.bodySmall),
+                    const SizedBox(width: 10),
                   ],
-                ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          widget.title ?? "",
+                          style: widget.style ?? AppTextStyles.label,
+                        ),
+                        if (widget.subTitle != null)
+                          Text(
+                            widget.subTitle!,
+                            style: AppTextStyles.bodySmall,
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (widget.showTrailingIcon) widget.trailingIcon,
+                ],
               ),
-              if (widget.showTrailingIcon) widget.trailingIcon,
-            ],
-          ),
         ),
       ),
     );
