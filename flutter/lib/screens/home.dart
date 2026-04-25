@@ -107,6 +107,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: BaseCard(
+        backgroundColor: Colors.grey.shade300,
+        boxShadow: AppShadows.boxLayered,
+        child: IconBox(
+          icon: SFIcons.sf_gearshape_fill,
+          backgroundColor: AppColors.iconBackgroundColor,
+        ),
+        onTap: () {
+          context.router.pushNamed('/settings');
+        },
+      ),
+      floatingActionButtonLocation: .startFloat,
       backgroundColor: Colors.transparent,
       body: SafeArea(child: _buildLayout()),
     );
@@ -146,17 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (_, index) => _buildGameCard(index),
                   ),
                 ),
-              ),
-              InteractiveCard(
-                title: "Settings",
-                backgroundColor: Colors.grey.shade300,
-                iconBackgroundColor: AppColors.iconBackgroundColor,
-                icon: SFIcons.sf_gearshape_fill,
-                showTrailingIcon: false,
-                boxShadow: AppShadows.boxLayered,
-                onTap: () {
-                  context.router.pushNamed('/settings');
-                },
               ),
             ],
           ),

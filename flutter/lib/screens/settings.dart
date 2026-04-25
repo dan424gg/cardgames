@@ -293,6 +293,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: "Email",
               icon: SFIcons.sf_mail_fill,
               borderRadius: 0,
+              onTap: () {
+                context.router.pushNamed('/emailsignup');
+              },
             ),
             if (!isAnonymous(user))
               InteractiveCard(

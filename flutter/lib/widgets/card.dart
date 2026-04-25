@@ -45,42 +45,40 @@ class InteractiveCard extends StatefulWidget {
 class _InteractiveCardState extends State<InteractiveCard> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return BaseCard(
+      backgroundColor: widget.backgroundColor,
+      boxShadow: widget.boxShadow,
+      borderRadius: widget.borderRadius,
+      height: widget.content != null ? null : AppContainerConstraints.height,
       onTap: widget.onTap,
-      child: BaseCard(
-        backgroundColor: widget.backgroundColor,
-        boxShadow: widget.boxShadow,
-        borderRadius: widget.borderRadius,
-        height: widget.content != null ? null : AppContainerConstraints.height,
-        child:
-            widget.content ??
-            Row(
-              children: [
-                if (widget.icon != null) ...[
-                  IconBox(
-                    icon: widget.icon!,
-                    backgroundColor: widget.iconBackgroundColor,
-                  ),
-                  const SizedBox(width: 10),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        widget.title ?? "",
-                        style: widget.style ?? AppTextStyles.label,
-                      ),
-                      if (widget.subTitle != null)
-                        Text(widget.subTitle!, style: AppTextStyles.bodySmall),
-                    ],
-                  ),
+      child:
+          widget.content ??
+          Row(
+            children: [
+              if (widget.icon != null) ...[
+                IconBox(
+                  icon: widget.icon!,
+                  backgroundColor: widget.iconBackgroundColor,
                 ),
-                if (widget.showTrailingIcon) widget.trailingIcon,
+                const SizedBox(width: 10),
               ],
-            ),
-      ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title ?? "",
+                      style: widget.style ?? AppTextStyles.label,
+                    ),
+                    if (widget.subTitle != null)
+                      Text(widget.subTitle!, style: AppTextStyles.bodySmall),
+                  ],
+                ),
+              ),
+              if (widget.showTrailingIcon) widget.trailingIcon,
+            ],
+          ),
     );
   }
 }
@@ -131,6 +129,7 @@ class BaseCard extends StatelessWidget {
   final double borderRadius;
   final List<BoxShadow>? boxShadow;
   final double? height;
+  final VoidCallback? onTap;
 
   const BaseCard({
     super.key,
@@ -139,20 +138,24 @@ class BaseCard extends StatelessWidget {
     this.borderRadius = AppContainerConstraints.borderRadius,
     this.boxShadow,
     this.height = AppContainerConstraints.height,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: boxShadow ?? AppShadows.boxLayered,
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        height: height,
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: boxShadow ?? AppShadows.boxLayered,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: child,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        child: child,
       ),
     );
   }
