@@ -64,33 +64,10 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
                               children: [
                                 MaterialPinField(
                                   length: 4,
-                                  onCompleted: (pin) => print('PIN: $pin'),
-                                  onChanged: (value) =>
-                                      print('Changed: $value'),
-                                  theme: MaterialPinTheme(
-                                    shape: MaterialPinShape.outlined,
-                                    cellSize: Size(56, 64),
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderColor: Color.fromRGBO(
-                                      198,
-                                      198,
-                                      200,
-                                      1,
-                                    ),
-                                    fillColor: Color.fromRGBO(242, 242, 247, 1),
-                                    filledFillColor: Color.fromRGBO(
-                                      242,
-                                      242,
-                                      247,
-                                      1,
-                                    ),
-                                    filledBorderColor: Color.fromRGBO(
-                                      198,
-                                      198,
-                                      200,
-                                      1,
-                                    ),
-                                  ),
+                                  onCompleted: (pin) {
+                                    print('PIN: $pin');
+                                    context.router.maybePop();
+                                  },
                                   autoFocus: true,
                                 ),
                               ],

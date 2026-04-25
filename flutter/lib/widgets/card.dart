@@ -130,15 +130,17 @@ class BaseCard extends StatelessWidget {
   final List<BoxShadow>? boxShadow;
   final double? height;
   final VoidCallback? onTap;
+  final Color? borderColor;
 
   const BaseCard({
     super.key,
     required this.backgroundColor,
     required this.child,
     this.borderRadius = AppContainerConstraints.borderRadius,
-    this.boxShadow,
+    this.boxShadow = AppShadows.boxLayered,
     this.height = AppContainerConstraints.height,
     this.onTap,
+    this.borderColor
   });
 
   @override
@@ -150,8 +152,9 @@ class BaseCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
+            border: borderColor != null ? BoxBorder.all(color: borderColor!) : null,
             borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow: boxShadow ?? AppShadows.boxLayered,
+            boxShadow: boxShadow,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           child: child,

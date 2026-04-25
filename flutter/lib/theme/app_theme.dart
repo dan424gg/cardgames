@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class AppSpacing {
   static const double spacing = 15.0;
@@ -82,6 +83,35 @@ class AppTextStyles {
 
 class AppTheme {
   static ThemeData get theme => ThemeData(
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: AppTextStyles.body,
+      filled: true,
+      fillColor: const Color.fromRGBO(242, 242, 247, 1),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color.fromRGBO(198, 198, 200, 1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color.fromRGBO(198, 198, 200, 1),
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.black,
+      selectionColor: Colors.lightBlueAccent.shade100,
+      selectionHandleColor: Colors.lightBlueAccent.shade100,
+    ),
     scaffoldBackgroundColor: AppColors.background,
     colorScheme: const ColorScheme.light(
       primary: AppColors.primary,
@@ -93,6 +123,19 @@ class AppTheme {
       bodySmall: GoogleFonts.inter(),
       labelLarge: GoogleFonts.inter(),
     ),
+    extensions: const [
+      MaterialPinThemeExtension(
+        theme: MaterialPinTheme(
+          shape: MaterialPinShape.outlined,
+          cellSize: Size(56, 64),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderColor: Color.fromRGBO(198, 198, 200, 1),
+          fillColor: Color.fromRGBO(242, 242, 247, 1),
+          filledFillColor: Color.fromRGBO(242, 242, 247, 1),
+          filledBorderColor: Color.fromRGBO(198, 198, 200, 1),
+        ),
+      ),
+    ],
   );
 }
 
