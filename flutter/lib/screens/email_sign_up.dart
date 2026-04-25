@@ -106,7 +106,7 @@ class _EmailSignUpState extends State<EmailSignUp> {
                                             198,
                                             200,
                                             1,
-                                          ), // Keeps the same color
+                                          ), 
                                           width: 1.5,
                                         ),
                                       ),
