@@ -26,8 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool allowMusic = true;
   bool allowMotion = true;
 
-  bool signInExpanded = false;
-  bool signUpExpanded = false;
+  bool emailAuthExpanded = false;
 
   final randomNameGenerator = UniqueNamesGenerator(
     config: Config(
@@ -74,17 +73,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  void toggleSignInExpanded() {
+  void toggleEmailAuthExpanded() {
     setState(() {
-      signUpExpanded = false;
-      signInExpanded = !signInExpanded;
-    });
-  }
-
-  void toggleSignUpExpanded() {
-    setState(() {
-      signInExpanded = false;
-      signUpExpanded = !signUpExpanded;
+      emailAuthExpanded = !emailAuthExpanded;
     });
   }
 
@@ -265,37 +256,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
 
       if (user == null || isAnonymous(user))
-        CardList(
-          borderRadius: .vertical(
-            top: Radius.circular(AppContainerConstraints.borderRadius),
-            bottom: Radius.circular(AppContainerConstraints.borderRadius),
-          ),
+        ExpandableCardList(
           header: InteractiveCard(
             backgroundColor: AppColors.primary,
             iconBackgroundColor: AppColors.iconBackgroundColor,
-            title: isAnonymous(user) ? "Link with Online Account" : "Sign In",
+            title: isAnonymous(user) ? "Link with Online Account" : "Register",
             icon: SFIcons.sf_checkmark_circle_fill,
-            trailingIcon: AnimatedChevron(expanded: signInExpanded),
             boxShadow: AppShadows.boxLayered,
             borderRadius: 0,
             showTrailingIcon: false,
           ),
-          children: [
+          widthFactor: 1.0,
+          expandedChildWidthFactor: 0.9,
+          isExpanded: emailAuthExpanded,
+          items: [
             InteractiveCard(
               borderRadius: 0,
               title: "Google",
               icon: SFIcons.sf_g_circle_fill,
-              onTap: () {
-                signInWithGoogle();
-              },
-            ),
-            InteractiveCard(
-              title: "Email",
-              icon: SFIcons.sf_mail_fill,
-              borderRadius: 0,
-              onTap: () {
-                context.router.pushNamed('/emailsignup');
-              },
+              onTap: () => signInWithGoogle(),
             ),
             if (!isAnonymous(user))
               InteractiveCard(
@@ -305,6 +284,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => signInAnonymously(),
               ),
           ],
+          expandableItem: InteractiveCard(
+            title: "Email",
+            icon: SFIcons.sf_mail_fill,
+            borderRadius: 0,
+            trailingIcon: AnimatedChevron(expanded: emailAuthExpanded),
+            onTap: () => toggleEmailAuthExpanded(),
+          ),
+          expandedChild: CardList(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(AppContainerConstraints.borderRadius),
+            ),
+            children: [
+              InteractiveCard(
+                title: 'Sign Up',
+                icon: SFIcons.sf_play_fill,
+                style: AppTextStyles.body,
+                onTap: () => context.router.pushNamed('/emailsignup'),
+                borderRadius: 0,
+              ),
+              InteractiveCard(
+                title: 'Sign In',
+                icon: SFIcons.sf_plus,
+                style: AppTextStyles.body,
+                onTap: () => context.router.pushNamed('/emailsignin'),
+                borderRadius: 0,
+              ),
+            ],
+          ),
         ),
     ];
   }

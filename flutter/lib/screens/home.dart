@@ -199,74 +199,46 @@ class _HomeScreenState extends State<HomeScreen> {
       borderRadius: 0,
     );
 
-    return Stack(
-      alignment: .topCenter,
-      children: [
-        Column(
-          children: [
-            SizeHolder(child: onlineCard),
-            SizeHolder(child: onlineCard),
-            AnimatedExpandable(
-              isExpanded: state.onlineExpanded,
-              header: SizeHolder(child: onlineCard),
-              child: FractionallySizedBox(
-                widthFactor: 0.8,
-                child: CardList(
-                  borderRadius: .vertical(
-                    bottom: Radius.circular(
-                      AppContainerConstraints.borderRadius,
-                    ),
-                  ),
-                  children: [
-                    InteractiveCard(
-                      title: 'Start Game',
-                      icon: SFIcons.sf_play_fill,
-                      style: AppTextStyles.body,
-                      onTap: () {}, // TODO: handle navigation
-                      borderRadius: 0,
-                    ),
-                    InteractiveCard(
-                      title: 'Join Game',
-                      icon: SFIcons.sf_plus,
-                      style: AppTextStyles.body,
-                      onTap: () {
-                        context.router.pushNamed('/joingame');
-                      },
-                      borderRadius: 0,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+    return ExpandableCardList(
+      isExpanded: state.onlineExpanded,
+      items: [
+        InteractiveCard(
+          title: 'Single Player',
+          icon: SFIcons.sf_person_fill,
+          style: AppTextStyles.body,
+          onTap: () {},
+          borderRadius: 0,
         ),
-
-        FractionallySizedBox(
-          widthFactor: 0.9,
-          child: CardList(
-            borderRadius: .vertical(
-              bottom: Radius.circular(AppContainerConstraints.borderRadius),
-            ),
-            children: [
-              InteractiveCard(
-                title: 'Single Player',
-                icon: SFIcons.sf_person_fill,
-                style: AppTextStyles.body,
-                onTap: () {}, // TODO: handle navigation
-                borderRadius: 0,
-              ),
-              InteractiveCard(
-                title: 'Pass and Play',
-                icon: SFIcons.sf_person_3_fill,
-                style: AppTextStyles.body,
-                onTap: () {}, // TODO: handle navigation
-                borderRadius: 0,
-              ),
-              onlineCard,
-            ],
-          ),
+        InteractiveCard(
+          title: 'Pass and Play',
+          icon: SFIcons.sf_person_3_fill,
+          style: AppTextStyles.body,
+          onTap: () {},
+          borderRadius: 0,
         ),
       ],
+      expandableItem: onlineCard,
+      expandedChild: CardList(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppContainerConstraints.borderRadius),
+        ),
+        children: [
+          InteractiveCard(
+            title: 'Start Game',
+            icon: SFIcons.sf_play_fill,
+            style: AppTextStyles.body,
+            onTap: () {},
+            borderRadius: 0,
+          ),
+          InteractiveCard(
+            title: 'Join Game',
+            icon: SFIcons.sf_plus,
+            style: AppTextStyles.body,
+            onTap: () => context.router.pushNamed('/joingame'),
+            borderRadius: 0,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:app/widgets/animated_expandable.dart';
+import 'package:app/widgets/size_holder.dart';
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'package:app/widgets/icon_box.dart';
@@ -84,8 +86,8 @@ class _InteractiveCardState extends State<InteractiveCard> {
 }
 
 class CardList extends StatelessWidget {
-  final InteractiveCard? header;
-  final List<InteractiveCard> children;
+  final Widget? header;
+  final List<Widget> children;
   final BorderRadius borderRadius;
   final Color? dividerColor;
 
@@ -123,6 +125,94 @@ class CardList extends StatelessWidget {
   }
 }
 
+/// A [CardList] where the last item can expand downward to reveal
+/// additional content, while the card list itself overlays a placeholder
+/// stack that reserves space for the expansion.
+class ExpandableCardList extends StatelessWidget {
+  const ExpandableCardList({
+    super.key,
+    required this.items,
+    required this.expandableItem,
+    required this.expandedChild,
+    required this.isExpanded,
+    this.header,
+    this.widthFactor = 0.9,
+    this.expandedChildWidthFactor = 0.8,
+    this.borderRadius,
+  });
+
+  /// Header for the [CardList]
+  final Widget? header;
+
+  /// The non-expandable items shown above the expandable last item.
+  final List<Widget> items;
+
+  /// The widget used as the last (expandable) item in the card list.
+  /// Also used as the header inside [AnimatedExpandable].
+  final Widget expandableItem;
+
+  /// The content revealed when expanded.
+  final Widget expandedChild;
+
+  final bool isExpanded;
+
+  /// Width of the overlay [CardList] relative to available width.
+  final double widthFactor;
+
+  /// Width of the [expandedChild] relative to available width.
+  final double expandedChildWidthFactor;
+
+  /// Border radius applied to the overlay [CardList].
+  final BorderRadius? borderRadius;
+
+  BorderRadius get _defaultBorderRadius => BorderRadius.vertical(
+    bottom: Radius.circular(AppContainerConstraints.borderRadius),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveBorderRadius = borderRadius ?? _defaultBorderRadius;
+
+    // The expandable item is reused in three places:
+    //   1. As a transparent size-holder in the placeholder column (for spacing)
+    //   2. As a transparent size-holder in the placeholder column (aligns with overlay)
+    //   3. As the visible header inside AnimatedExpandable (drives the expansion)
+    final placeholder = SizeHolder(child: expandableItem);
+
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        // Layer 1 — placeholder column that grows with the expansion,
+        // pushing the Stack's intrinsic height downward.
+        Column(
+          children: [
+            if (header != null) SizeHolder(child: header!),
+            for (final item in items) SizeHolder(child: item),
+            AnimatedExpandable(
+              isExpanded: isExpanded,
+              header: placeholder,
+              child: FractionallySizedBox(
+                widthFactor: expandedChildWidthFactor,
+                child: expandedChild,
+              ),
+            ),
+          ],
+        ),
+
+        // Layer 2 — the visible card list, floating on top of the placeholders.
+        FractionallySizedBox(
+          widthFactor: widthFactor,
+          child: CardList(
+            header: header,
+            borderRadius: effectiveBorderRadius,
+            children: [...items, expandableItem],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class BaseCard extends StatelessWidget {
   final Color backgroundColor;
   final Widget child;
@@ -140,7 +230,7 @@ class BaseCard extends StatelessWidget {
     this.boxShadow = AppShadows.boxLayered,
     this.height = AppContainerConstraints.height,
     this.onTap,
-    this.borderColor
+    this.borderColor,
   });
 
   @override
@@ -152,7 +242,9 @@ class BaseCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
-            border: borderColor != null ? BoxBorder.all(color: borderColor!) : null,
+            border: borderColor != null
+                ? BoxBorder.all(color: borderColor!)
+                : null,
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: boxShadow,
           ),
