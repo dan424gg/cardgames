@@ -4,6 +4,7 @@ import '../widgets/animated_chevron.dart';
 import '../widgets/card.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_snackbar.dart';
+import '../widgets/icon_box.dart';
 import '../widgets/size_holder.dart';
 import '../widgets/app_title.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
@@ -106,26 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(top: 15),
-        child: GestureDetector(
-          onTap: () {
-            context.router.pushNamed('/settings');
-          },
-          child: SizedBox(
-            width: 165,
-            child: BaseCard(
-              title: "Settings",
-              backgroundColor: Colors.grey.shade300,
-              iconBackgroundColor: AppColors.iconBackgroundColor,
-              icon: SFIcons.sf_gearshape_fill,
-              showTrailingIcon: false,
-              boxShadow: AppShadows.boxLayered,
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: .endTop,
       backgroundColor: Colors.transparent,
       body: SafeArea(child: _buildLayout()),
     );
@@ -135,32 +116,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return Center(
       child: SizedBox(
         width: 400,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                left: AppSpacing.padding,
-                top: AppSpacing.padding + 20,
-                right: AppSpacing.padding,
+        child: Padding(
+          padding: .only(
+            left: AppSpacing.padding,
+            right: AppSpacing.padding,
+            bottom: AppSpacing.padding,
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  left: AppSpacing.padding,
+                  top: AppSpacing.padding + 20,
+                  right: AppSpacing.padding,
+                ),
+                child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
               ),
-              child: AppTitle(text: 'CARDS', style: AppTextStyles.title),
-            ),
-            Expanded(
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(
-                  context,
-                ).copyWith(scrollbars: false),
-                child: ListView.separated(
-                  padding: EdgeInsets.all(AppSpacing.padding),
-                  physics: const ClampingScrollPhysics(),
-                  itemCount: _games.length,
-                  separatorBuilder: (_, _) =>
-                      SizedBox(height: AppSpacing.spacing),
-                  itemBuilder: (_, index) => _buildGameCard(index),
+              Expanded(
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(
+                    context,
+                  ).copyWith(scrollbars: false),
+                  child: ListView.separated(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.padding),
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: _games.length,
+                    separatorBuilder: (_, _) =>
+                        SizedBox(height: AppSpacing.spacing),
+                    itemBuilder: (_, index) => _buildGameCard(index),
+                  ),
                 ),
               ),
-            ),
-          ],
+              InteractiveCard(
+                title: "Settings",
+                backgroundColor: Colors.grey.shade300,
+                iconBackgroundColor: AppColors.iconBackgroundColor,
+                icon: SFIcons.sf_gearshape_fill,
+                showTrailingIcon: false,
+                boxShadow: AppShadows.boxLayered,
+                onTap: () {
+                  context.router.pushNamed('/settings');
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -174,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return AnimatedExpandable(
       isExpanded: state.gameTypeExpanded,
-      header: BaseCard(
+      header: InteractiveCard(
         title: game.title,
         icon: game.icon,
         trailingIcon: AnimatedChevron(expanded: state.gameTypeExpanded),
@@ -190,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildGameTypeOptions(int index) {
     final state = _expansionStates[index];
 
-    final onlineCard = BaseCard(
+    final onlineCard = InteractiveCard(
       title: 'Online',
       icon: SFIcons.sf_person_line_dotted_person_fill,
       style: AppTextStyles.body,
@@ -218,14 +217,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   children: [
-                    BaseCard(
+                    InteractiveCard(
                       title: 'Start Game',
                       icon: SFIcons.sf_play_fill,
                       style: AppTextStyles.body,
                       onTap: () {}, // TODO: handle navigation
                       borderRadius: 0,
                     ),
-                    BaseCard(
+                    InteractiveCard(
                       title: 'Join Game',
                       icon: SFIcons.sf_plus,
                       style: AppTextStyles.body,
@@ -248,14 +247,14 @@ class _HomeScreenState extends State<HomeScreen> {
               bottom: Radius.circular(AppContainerConstraints.borderRadius),
             ),
             children: [
-              BaseCard(
+              InteractiveCard(
                 title: 'Single Player',
                 icon: SFIcons.sf_person_fill,
                 style: AppTextStyles.body,
                 onTap: () {}, // TODO: handle navigation
                 borderRadius: 0,
               ),
-              BaseCard(
+              InteractiveCard(
                 title: 'Pass and Play',
                 icon: SFIcons.sf_person_3_fill,
                 style: AppTextStyles.body,

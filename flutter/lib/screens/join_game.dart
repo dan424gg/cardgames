@@ -14,10 +14,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../widgets/error_snackbar.dart';
 import 'package:unique_names_generator/unique_names_generator.dart';
 import 'package:pinput/pinput.dart';
-
-//
-
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 @RoutePage(name: 'JoinGame')
@@ -33,6 +29,7 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        centerTitle: true,
         title: Padding(
           padding: .only(top: 15),
           child: AppTitle(
@@ -43,48 +40,60 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
         ),
         backgroundColor: Colors.transparent,
       ),
-      body: SafeArea(
-        child: Container(
-          alignment: .topCenter,
-          child: SizedBox(
-            width: 400,
-            child: CardList(
-              header: BaseCard(
-                backgroundColor: AppColors.primary,
-                iconBackgroundColor: AppColors.iconBackgroundColor,
-                title: "Game Code",
-                icon: SFIcons.sf_list_clipboard_fill,
-                showTrailingIcon: false,
-                borderRadius: 0,
-              ),
-              children: [
-                BaseCard(
-                  borderRadius: 0,
-                  content: Column(
-                    mainAxisAlignment: .center,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            top: -kToolbarHeight, // offset back up by AppBar height
+            child: Center(
+              child: SizedBox(
+                width: 400,
+                child: Padding(
+                  padding: .all(AppSpacing.padding),
+                  child: CardList(
+                    header: InteractiveCard(
+                      backgroundColor: AppColors.primary,
+                      iconBackgroundColor: AppColors.iconBackgroundColor,
+                      title: "Game Code",
+                      icon: SFIcons.sf_list_clipboard_fill,
+                      showTrailingIcon: false,
+                      borderRadius: 0,
+                    ),
                     children: [
-                      Row(
-                        mainAxisAlignment: .center,
-                        children: [
-                          SmartTextField(
-                            mode: SmartTextFieldMode.pin,
-                            pinLength: 6,
-                            pinBoxSize: 48,
-                            autoFocus: false,
-                            animationCurve: AppAnimations.curve,
-                            animationDuration: AppAnimations.duration,
-                            onPinCompleted: (pin) => print('PIN: $pin'),
-                          ),
-                        ],
+                      InteractiveCard(
+                        borderRadius: 0,
+                        content: Column(
+                          spacing: AppSpacing.spacing,
+                          mainAxisAlignment: .center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: .center,
+                              children: [
+                                SmartTextField(
+                                  mode: SmartTextFieldMode.pin,
+                                  pinLength: 4,
+                                  pinBoxSize: 64,
+                                  autoFocus: true,
+                                  animationCurve: AppAnimations.curve,
+                                  animationDuration: AppAnimations.duration,
+                                  onPinCompleted: (pin) => print('PIN: $pin'),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              "Enter 4 digit session code from the host.",
+                              style: AppTextStyles.bodySmall,
+                            ),
+                          ],
+                        ),
+                        showTrailingIcon: false,
                       ),
                     ],
                   ),
-                  showTrailingIcon: false,
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -546,11 +555,6 @@ class _PinBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // final borderColor = switch ((isActive)) {
-    //   false => Color.fromRGBO(198, 198, 200, 1),
-    //   true => Colors.black,
-    // };
-
     final borderColor = Color.fromRGBO(198, 198, 200, 1);
 
     final borderWidth = (isActive || isFilled) ? 2.0 : 1.0;
@@ -571,7 +575,7 @@ class _PinBox extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: borderColor, width: borderWidth),
-            boxShadow: AppShadows.boxLayered,
+            // boxShadow: AppShadows.boxLayered,
           ),
           child: child,
         );

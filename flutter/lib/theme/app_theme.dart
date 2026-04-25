@@ -103,4 +103,5 @@ class AppAnimations {
 
 class AppContainerConstraints {
   static const double borderRadius = 12;
+  static const double height = 70;
 }

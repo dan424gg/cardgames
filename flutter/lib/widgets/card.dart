@@ -3,7 +3,7 @@ import '../../theme/app_theme.dart';
 import 'package:app/widgets/icon_box.dart';
 import 'package:flutter_sficon/flutter_sficon.dart';
 
-class BaseCard extends StatefulWidget {
+class InteractiveCard extends StatefulWidget {
   final IconData? icon;
   final Widget trailingIcon;
   final bool showTrailingIcon;
@@ -17,7 +17,7 @@ class BaseCard extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? content;
 
-  const BaseCard({
+  const InteractiveCard({
     super.key,
     this.icon,
     this.trailingIcon = const Icon(
@@ -39,63 +39,55 @@ class BaseCard extends StatefulWidget {
   });
 
   @override
-  State<BaseCard> createState() => _BaseCardState();
+  State<InteractiveCard> createState() => _InteractiveCardState();
 }
 
-class _BaseCardState extends State<BaseCard> {
+class _InteractiveCardState extends State<InteractiveCard> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.content != null ? null : 70,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: widget.backgroundColor,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: widget.boxShadow,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          child:
-              widget.content ??
-              Row(
-                children: [
-                  if (widget.icon != null) ...[
-                    IconBox(
-                      icon: widget.icon!,
-                      backgroundColor: widget.iconBackgroundColor,
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          widget.title ?? "",
-                          style: widget.style ?? AppTextStyles.label,
-                        ),
-                        if (widget.subTitle != null)
-                          Text(
-                            widget.subTitle!,
-                            style: AppTextStyles.bodySmall,
-                          ),
-                      ],
-                    ),
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: BaseCard(
+        backgroundColor: widget.backgroundColor,
+        boxShadow: widget.boxShadow,
+        borderRadius: widget.borderRadius,
+        height: widget.content != null ? null : AppContainerConstraints.height,
+        child:
+            widget.content ??
+            Row(
+              children: [
+                if (widget.icon != null) ...[
+                  IconBox(
+                    icon: widget.icon!,
+                    backgroundColor: widget.iconBackgroundColor,
                   ),
-                  if (widget.showTrailingIcon) widget.trailingIcon,
+                  const SizedBox(width: 10),
                 ],
-              ),
-        ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.title ?? "",
+                        style: widget.style ?? AppTextStyles.label,
+                      ),
+                      if (widget.subTitle != null)
+                        Text(widget.subTitle!, style: AppTextStyles.bodySmall),
+                    ],
+                  ),
+                ),
+                if (widget.showTrailingIcon) widget.trailingIcon,
+              ],
+            ),
       ),
     );
   }
 }
 
 class CardList extends StatelessWidget {
-  final BaseCard? header;
-  final List<BaseCard> children;
+  final InteractiveCard? header;
+  final List<InteractiveCard> children;
   final BorderRadius borderRadius;
   final Color? dividerColor;
 
@@ -128,6 +120,39 @@ class CardList extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class BaseCard extends StatelessWidget {
+  final Color backgroundColor;
+  final Widget child;
+  final double borderRadius;
+  final List<BoxShadow>? boxShadow;
+  final double? height;
+
+  const BaseCard({
+    super.key,
+    required this.backgroundColor,
+    required this.child,
+    this.borderRadius = AppContainerConstraints.borderRadius,
+    this.boxShadow,
+    this.height = AppContainerConstraints.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: boxShadow ?? AppShadows.boxLayered,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        child: child,
       ),
     );
   }

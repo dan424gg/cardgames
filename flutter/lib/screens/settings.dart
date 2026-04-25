@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return user.isAnonymous;
   }
 
-  BaseCard getProvider(User? user) {
+  InteractiveCard getProvider(User? user) {
     late String provider;
 
     if (!isAnonymous(user)) {
@@ -220,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       provider = "Guest";
     }
 
-    return BaseCard(
+    return InteractiveCard(
       borderRadius: 0,
       title: provider.contains(',') ? "Providers" : "Provider",
       subTitle: provider,
@@ -231,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return [
       if (user != null)
         CardList(
-          header: BaseCard(
+          header: InteractiveCard(
             backgroundColor: AppColors.primary,
             iconBackgroundColor: AppColors.iconBackgroundColor,
             title: "Account",
@@ -240,20 +240,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             borderRadius: 0,
           ),
           children: [
-            BaseCard(
+            InteractiveCard(
               borderRadius: 0,
               title: "Display Name",
               subTitle: _pendingDisplayName ?? user.displayName ?? "Not set",
             ),
             getProvider(user),
-            BaseCard(
+            InteractiveCard(
               title: "Sign Out",
               icon: SFIcons.sf_arrowshape_left_fill,
               onTap: _signOut,
               borderRadius: 0,
             ),
             if (!isAnonymous(user))
-              BaseCard(
+              InteractiveCard(
                 title: "Delete Account",
                 icon: SFIcons.sf_x_circle_fill,
                 onTap: _checkDeleteUser,
@@ -270,7 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             top: Radius.circular(AppContainerConstraints.borderRadius),
             bottom: Radius.circular(AppContainerConstraints.borderRadius),
           ),
-          header: BaseCard(
+          header: InteractiveCard(
             backgroundColor: AppColors.primary,
             iconBackgroundColor: AppColors.iconBackgroundColor,
             title: isAnonymous(user) ? "Link with Online Account" : "Sign In",
@@ -281,7 +281,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             showTrailingIcon: false,
           ),
           children: [
-            BaseCard(
+            InteractiveCard(
               borderRadius: 0,
               title: "Google",
               icon: SFIcons.sf_g_circle_fill,
@@ -289,13 +289,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 signInWithGoogle();
               },
             ),
-            BaseCard(
+            InteractiveCard(
               title: "Email",
               icon: SFIcons.sf_mail_fill,
               borderRadius: 0,
             ),
             if (!isAnonymous(user))
-              BaseCard(
+              InteractiveCard(
                 borderRadius: 0,
                 title: "Guest",
                 icon: SFIcons.sf_person_fill,
@@ -311,6 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        centerTitle: true,
         title: Padding(
           padding: .only(top: 15),
           child: AppTitle(
@@ -350,7 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       spacing: AppSpacing.spacing,
                       children: [
                         CardList(
-                          header: BaseCard(
+                          header: InteractiveCard(
                             backgroundColor: AppColors.primary,
                             iconBackgroundColor: AppColors.iconBackgroundColor,
                             title: "Sounds",
@@ -359,7 +360,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             borderRadius: 0,
                           ),
                           children: [
-                            BaseCard(
+                            InteractiveCard(
                               borderRadius: 0,
                               title: "Music",
                               subTitle: "Toggle in-game music",
@@ -375,7 +376,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     updateAllowMusic(value),
                               ),
                             ),
-                            BaseCard(
+                            InteractiveCard(
                               borderRadius: 0,
                               title: "Motion",
                               subTitle: "Toggle motion (ie. background suits)",
@@ -394,7 +395,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         ..._buildAuthContent(user),
-                        BaseCard(
+                        InteractiveCard(
                           borderRadius: 12,
                           title: "Buy me a Coffee",
                           icon: SFIcons.sf_cup_and_heat_waves_fill,
