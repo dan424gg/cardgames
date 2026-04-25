@@ -3,11 +3,32 @@ import 'package:flutter/material.dart';
 import 'app_router.gr.dart'; // generated file
 import '../theme/app_theme.dart';
 
-@AutoRouterConfig() // tells AutoRoute this is the central navigation config
+enum SlideDirection { left, right, up, down }
+
+extension SlideDirectionX on SlideDirection {
+  Offset get offset {
+    switch (this) {
+      case SlideDirection.left:  return const Offset(-1.0, 0.0);
+      case SlideDirection.right: return const Offset(1.0, 0.0);
+      case SlideDirection.up:    return const Offset(0.0, -1.0);
+      case SlideDirection.down:  return const Offset(0.0, 1.0);
+    }
+  }
+
+  SlideDirection get opposite {
+    switch (this) {
+      case SlideDirection.left:  return SlideDirection.right;
+      case SlideDirection.right: return SlideDirection.left;
+      case SlideDirection.up:    return SlideDirection.down;
+      case SlideDirection.down:  return SlideDirection.up;
+    }
+  }
+}
+
+@AutoRouterConfig()
 class AppRouter extends $AppRouter {
-  // Helper method to reduce boilerplate for slide transitions
   static Widget _buildSlideTransition({
-    required Offset slideDirection,
+    required SlideDirection direction,
     required Animation<double> animation,
     required Animation<double> secondaryAnimation,
     required Widget child,
@@ -22,13 +43,13 @@ class AppRouter extends $AppRouter {
     );
 
     final slideInAnimation = Tween<Offset>(
-      begin: slideDirection,
+      begin: direction.offset,
       end: Offset.zero,
     ).animate(curvedAnimation);
 
     final slideOutAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: slideDirection,
+      end: direction.opposite.offset,
     ).animate(curvedSecondaryAnimation);
 
     return SlideTransition(
@@ -37,10 +58,8 @@ class AppRouter extends $AppRouter {
     );
   }
 
-  // list of routes to be used
   @override
   List<AutoRoute> get routes => [
-    // [screen].page only becomes available when widget is annotated with @RoutePage (using code-gen)
     CustomRoute(
       path: '/',
       page: Home.page,
@@ -48,7 +67,7 @@ class AppRouter extends $AppRouter {
       reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return _buildSlideTransition(
-          slideDirection: const Offset(-1.0, 0.0),
+          direction: SlideDirection.right,
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           child: child,
@@ -62,7 +81,7 @@ class AppRouter extends $AppRouter {
       reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return _buildSlideTransition(
-          slideDirection: const Offset(1.0, 0.0),
+          direction: SlideDirection.right,
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           child: child,
@@ -76,7 +95,7 @@ class AppRouter extends $AppRouter {
       reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return _buildSlideTransition(
-          slideDirection: const Offset(1.0, 0.0),
+          direction: SlideDirection.right,
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           child: child,
@@ -90,7 +109,7 @@ class AppRouter extends $AppRouter {
       reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return _buildSlideTransition(
-          slideDirection: const Offset(1.0, 0.0),
+          direction: SlideDirection.right,
           animation: animation,
           secondaryAnimation: secondaryAnimation,
           child: child,
