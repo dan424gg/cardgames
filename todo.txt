@@ -1,3 +1,13 @@
-- fully convert to using sf_symbols library
-- start using animations for menu items
-- instead of passing int for border radius, pass actual BorderRadius for more customizability
+- start using buttons for the interactive cards
+    - split out to interactive cards and like primaery interactive cards??
+- have listener for internet connectivity, and either:
+    1. hide internet needed things
+    2. disable them
+- convert to using ThemeData font collections
+    - access with Theme.of(context).textTheme. ...
+    - predefine in ThemeData.textTheme
+- when provider is email
+    - ability to update email (?)
+    - ability to reset password when provider is email
+- ability to change display name
+- allow linking with other oauth accounts

@@ -116,5 +116,19 @@ class AppRouter extends $AppRouter {
         );
       },
     ),
+    CustomRoute(
+      path: '/emailsignin',
+      page: EmailSignIn.page,
+      durationInMilliseconds: AppAnimations.duration.inMilliseconds,
+      reverseDurationInMilliseconds: AppAnimations.duration.inMilliseconds,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return _buildSlideTransition(
+          direction: SlideDirection.right,
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
+    ),
   ];
 }

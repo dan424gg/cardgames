@@ -85,7 +85,7 @@ class AppTheme {
   static ThemeData get theme => ThemeData(
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
+        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.7),
         disabledForegroundColor: AppColors.textPrimary.withValues(alpha: 0.5),
         foregroundColor: AppColors.textPrimary,
         backgroundColor: AppColors.primary,

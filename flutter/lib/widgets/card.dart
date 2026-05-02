@@ -166,6 +166,7 @@ class ExpandableCardList extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   BorderRadius get _defaultBorderRadius => BorderRadius.vertical(
+    top: Radius.circular(AppContainerConstraints.borderRadius),
     bottom: Radius.circular(AppContainerConstraints.borderRadius),
   );
 
