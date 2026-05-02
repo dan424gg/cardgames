@@ -1,5 +1,8 @@
+import 'package:app/widgets/error_snackbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/annotations.dart';
+import 'package:unique_names_generator/unique_names_generator.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_expandable.dart';
 import '../widgets/app_title.dart';
@@ -20,6 +23,19 @@ class _EmailSignUpState extends State<EmailSignUp> {
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
   bool _showRequirements = false;
+  late String email;
+  late String password;
+  bool emailValidated = false;
+  bool passwordValidated = false;
+
+  final randomNameGenerator = UniqueNamesGenerator(
+    config: Config(
+      length: 2,
+      dictionaries: [adjectives, animals],
+      separator: "",
+      style: .capital,
+    ),
+  );
 
   @override
   void initState() {
@@ -34,6 +50,34 @@ class _EmailSignUpState extends State<EmailSignUp> {
     _passwordController.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<UserCredential?> signUp() async {
+    print("Signing up with email...");
+    try {
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      await userCredential.user?.updateDisplayName(
+        randomNameGenerator.generate(),
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      final message = switch (e.code) {
+        'weak-password' => 'The password provided is too weak.',
+        'email-already-in-use' => 'The account already exists for that email.',
+        _ => "Unknown error.",
+      };
+
+      if (context.mounted) {
+        showErrorSnackBar(context, message: message);
+      } else {
+        print("Context isn't mounted???");
+      }
+
+      return null;
+    }
   }
 
   @override
@@ -59,85 +103,173 @@ class _EmailSignUpState extends State<EmailSignUp> {
             child: Center(
               child: SizedBox(
                 width: 400,
-                child: Padding(
-                  padding: .all(AppSpacing.padding),
-                  child: CardList(
-                    header: InteractiveCard(
-                      backgroundColor: AppColors.primary,
-                      iconBackgroundColor: AppColors.iconBackgroundColor,
-                      title: "Type in Email and Password",
-                      icon: SFIcons.sf_list_clipboard_fill,
-                      showTrailingIcon: false,
-                      borderRadius: 0,
-                    ),
-                    children: [
-                      InteractiveCard(
-                        borderRadius: 0,
-                        content: Column(
-                          spacing: AppSpacing.spacing,
-                          mainAxisAlignment: .center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: .center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    spacing: AppSpacing.spacing,
-                                    children: [
-                                      TextFormField(
-                                        autocorrect: false,
-                                        enableSuggestions: false,
-                                        textInputAction: TextInputAction.next,
-                                        autovalidateMode:
-                                            AutovalidateMode.onUserInteraction,
-                                        keyboardType:
-                                            TextInputType.emailAddress,
-                                        validator: (value) {
-                                          if (value != null) {
-                                            final emailRegex = RegExp(
-                                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                                            );
-                                            if (!emailRegex.hasMatch(value)) {
-                                              return 'Enter a valid email address';
-                                            }
-                                          }
-                                          return null;
-                                        },
-                                        decoration: InputDecoration(
-                                          labelText: "Email",
-                                        ),
-                                        onFieldSubmitted: (value) {
-                                          print("Email: $value");
-                                        },
-                                      ),
-                                      AnimatedExpandable(
-                                        isExpanded: _showRequirements,
-                                        header: PasswordField(
-                                          controller: _passwordController,
-                                          focusNode: _passwordFocusNode,
-                                          textInputAction: TextInputAction.next,
-                                        ),
-                                        child: PasswordRequirementsPanel(
-                                          controller: _passwordController,
-                                        ),
-                                      ),
-                                      PasswordField(
-                                        label: 'Confirm Password',
-                                        validator: (v) =>
-                                            v != _passwordController.text
-                                            ? 'Passwords do not match'
-                                            : null,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(
+                    context,
+                  ).copyWith(scrollbars: false),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(AppSpacing.padding),
+                    physics: const ClampingScrollPhysics(),
+                    child: Padding(
+                      padding: .all(AppSpacing.padding),
+                      child: Column(
+                        spacing: AppSpacing.spacing,
+                        children: [
+                          CardList(
+                            header: InteractiveCard(
+                              backgroundColor: AppColors.primary,
+                              iconBackgroundColor:
+                                  AppColors.iconBackgroundColor,
+                              title: "Type in Email and Password",
+                              icon: SFIcons.sf_list_clipboard_fill,
+                              showTrailingIcon: false,
+                              borderRadius: 0,
                             ),
-                          ],
-                        ),
-                        showTrailingIcon: false,
+                            children: [
+                              InteractiveCard(
+                                borderRadius: 0,
+                                content: Column(
+                                  spacing: AppSpacing.spacing,
+                                  mainAxisAlignment: .center,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: .center,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            spacing: AppSpacing.spacing,
+                                            children: [
+                                              // Track validation state in onChanged, not in validator
+                                              TextFormField(
+                                                autocorrect: false,
+                                                enableSuggestions: false,
+                                                textInputAction:
+                                                    TextInputAction.next,
+                                                autovalidateMode:
+                                                    AutovalidateMode
+                                                        .onUserInteraction,
+                                                keyboardType:
+                                                    TextInputType.emailAddress,
+                                                onChanged: (value) {
+                                                  final emailRegex = RegExp(
+                                                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                                  );
+                                                  setState(() {
+                                                    email = value;
+                                                    emailValidated = emailRegex
+                                                        .hasMatch(value);
+                                                  });
+                                                },
+                                                validator: (value) {
+                                                  final emailRegex = RegExp(
+                                                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                                  );
+                                                  if (value == null ||
+                                                      !emailRegex.hasMatch(
+                                                        value,
+                                                      )) {
+                                                    return 'Enter a valid email address';
+                                                  }
+                                                  return null;
+                                                },
+                                                decoration: InputDecoration(
+                                                  labelText: "Email",
+                                                ),
+                                              ),
+                                              AnimatedExpandable(
+                                                reverse: true,
+                                                isExpanded: _showRequirements,
+                                                header: PasswordField(
+                                                  controller:
+                                                      _passwordController,
+                                                  focusNode: _passwordFocusNode,
+                                                  textInputAction:
+                                                      TextInputAction.next,
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      password = value;
+                                                    });
+                                                  },
+                                                  validator: (v) {
+                                                    if (v == null ||
+                                                        !_passwordStrong(v)) {
+                                                      return 'Password does not meet requirements';
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    PasswordRequirementsPanel(
+                                                      controller:
+                                                          _passwordController,
+                                                    ),
+                                                    SizedBox(
+                                                      height:
+                                                          AppSpacing.spacing,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              PasswordField(
+                                                label: 'Confirm Password',
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    passwordValidated =
+                                                        value ==
+                                                        _passwordController
+                                                            .text;
+                                                  });
+                                                },
+                                                validator: (v) {
+                                                  if (v !=
+                                                      _passwordController
+                                                          .text) {
+                                                    return 'Passwords do not match';
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                showTrailingIcon: false,
+                              ),
+                            ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              boxShadow: AppShadows.boxLayered,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ElevatedButton(
+                              onPressed: (emailValidated && passwordValidated)
+                                  ? () {
+                                      signUp();
+                                      context.router.maybePop();
+                                    }
+                                  : null,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 15,
+                                    ),
+                                    child: Text("Continue"),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -158,7 +290,7 @@ class PasswordField extends StatefulWidget {
     this.focusNode,
     this.label = 'Password',
     this.validator,
-    this.onFieldSubmitted,
+    this.onChanged,
     this.textInputAction = TextInputAction.done,
   });
 
@@ -166,7 +298,7 @@ class PasswordField extends StatefulWidget {
   final FocusNode? focusNode;
   final String label;
   final String? Function(String?)? validator;
-  final void Function(String)? onFieldSubmitted;
+  final void Function(String)? onChanged;
   final TextInputAction textInputAction;
 
   @override
@@ -187,7 +319,7 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: _obscured,
       textInputAction: widget.textInputAction,
       validator: widget.validator,
-      onFieldSubmitted: widget.onFieldSubmitted,
+      onChanged: widget.onChanged,
       decoration: InputDecoration(
         labelText: widget.label,
         suffixIcon: IconButton(
@@ -244,12 +376,9 @@ class _PasswordRequirementsPanelState extends State<PasswordRequirementsPanel> {
       widthFactor: 0.9,
       child: Column(
         children: [
-          SizedBox(height: 8),
           BaseCard(
             backgroundColor: Colors.white,
             height: null,
-            boxShadow: null,
-            borderColor: Colors.black,
             child: Column(
               children: _requirements.map((r) {
                 final passed = r.$2(text);
@@ -284,3 +413,9 @@ bool _hasUpper(String v) => v.contains(RegExp(r'[A-Z]'));
 bool _hasLower(String v) => v.contains(RegExp(r'[a-z]'));
 bool _hasDigit(String v) => v.contains(RegExp(r'[0-9]'));
 bool _hasSpecial(String v) => v.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
+bool _passwordStrong(String v) =>
+    _minLength(v) &&
+    _hasUpper(v) &&
+    _hasLower(v) &&
+    _hasDigit(v) &&
+    _hasSpecial(v);

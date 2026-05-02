@@ -76,13 +76,27 @@ class AppTextStyles {
 
   static final label = GoogleFonts.inter(
     fontSize: 16,
-    color: AppColors.textPrimary,
+    // color: AppColors.textPrimary,
     fontWeight: FontWeight.w600,
   );
 }
 
 class AppTheme {
   static ThemeData get theme => ThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
+        disabledForegroundColor: AppColors.textPrimary.withValues(alpha: 0.5),
+        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.primary,
+        maximumSize: Size.fromHeight(53),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            AppContainerConstraints.borderRadius,
+          ),
+        ),
+      ),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       labelStyle: AppTextStyles.body,
       filled: true,
@@ -121,7 +135,11 @@ class AppTheme {
     textTheme: TextTheme(
       bodyMedium: GoogleFonts.inter(),
       bodySmall: GoogleFonts.inter(),
-      labelLarge: GoogleFonts.inter(),
+      labelLarge: GoogleFonts.inter(
+        fontSize: 16,
+        color: AppColors.textPrimary,
+        fontWeight: FontWeight.w600,
+      ),
     ),
     extensions: const [
       MaterialPinThemeExtension(

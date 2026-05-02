@@ -9,12 +9,9 @@ class SizeHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: false,
-      maintainSize: true,
-      maintainState: true,
-      maintainAnimation: true,
-      child: child,
+    return ExcludeFocus(
+      excluding: true,
+      child: IgnorePointer(child: Opacity(opacity: 0, child: child)),
     );
   }
 }

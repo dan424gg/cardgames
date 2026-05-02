@@ -234,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             InteractiveCard(
               borderRadius: 0,
               title: "Display Name",
-              subTitle: _pendingDisplayName ?? user.displayName ?? "Not set",
+              subTitle: _pendingDisplayName ?? user.displayName ?? "Not Set",
             ),
             getProvider(user),
             InteractiveCard(
